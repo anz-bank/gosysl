@@ -1,93 +1,43 @@
 apps {
-  key: "Authorizer"
-  value {
-    name {
-      part: "Authorizer"
-    }
-    endpoints {
-      key: "AuthorizeAdmin"
-      value {
-        name: "AuthorizeAdmin"
-        stmt {
-          ret {
-            payload: "http.Handler"
-          }
-        }
-        param {
-          name: "next"
-          type {
-            type_ref {
-              ref {
-                appname {
-                  part: "http"
-                }
-                path: "Handler"
-              }
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "AuthorizeDataSet"
-      value {
-        name: "AuthorizeDataSet"
-        stmt {
-          ret {
-            payload: "http.Handler"
-          }
-        }
-        param {
-          name: "next"
-          type {
-            type_ref {
-              ref {
-                appname {
-                  part: "http"
-                }
-                path: "Handler"
-              }
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "AuthorizeRoot"
-      value {
-        name: "AuthorizeRoot"
-        stmt {
-          ret {
-            payload: "http.Handler"
-          }
-        }
-        param {
-          name: "next"
-          type {
-            type_ref {
-              ref {
-                appname {
-                  part: "http"
-                }
-                path: "Handler"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-apps {
   key: "RestApi"
   value {
     name {
       part: "RestApi"
     }
-    endpoints {
-      key: "DELETE /api/{key}"
+    attrs {
+      key: "interface"
       value {
-        name: "DELETE /api/{key}"
+        s: "Storer"
+      }
+    }
+    attrs {
+      key: "interface_doc"
+      value {
+        s: "Storer is cool"
+      }
+    }
+    attrs {
+      key: "json_map_fields"
+      value {
+        s: "dashes"
+      }
+    }
+    endpoints {
+      key: "DELETE /api/admin/{key}"
+      value {
+        name: "DELETE /api/admin/{key}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteDataSet"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
         attrs {
           key: "patterns"
           value {
@@ -99,35 +49,20 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "DeleteDataSet"
-            arg {
-              name: "key"
-            }
+          action {
+            action: "return"
           }
         }
         rest_params {
           method: DELETE
-          path: "/api/{key}"
+          path: "/api/admin/{key}"
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 38
+                  line: 37
                 }
               }
             }
@@ -141,6 +76,18 @@ apps {
       value {
         name: "DELETE /api/{key}/schema/{startTime}"
         attrs {
+          key: "method_name"
+          value {
+            s: "DeleteSchema"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -151,17 +98,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "DeleteSchema"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "start"
-            }
+          action {
+            action: "return"
           }
         }
         rest_params {
@@ -173,7 +111,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 30
+                  line: 29
                 }
               }
             }
@@ -182,19 +120,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 30
+                  line: 29
                 }
               }
             }
@@ -208,6 +137,18 @@ apps {
       value {
         name: "DELETE /api/{key}/{startTime}"
         attrs {
+          key: "method_name"
+          value {
+            s: "DeleteData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -218,17 +159,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "DeleteData"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "start"
-            }
+          action {
+            action: "return"
           }
         }
         rest_params {
@@ -240,7 +172,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 18
+                  line: 17
                 }
               }
             }
@@ -249,19 +181,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 18
+                  line: 17
                 }
               }
             }
@@ -275,33 +198,23 @@ apps {
       value {
         name: "GET /api"
         attrs {
-          key: "patterns"
+          key: "method_doc"
           value {
-            a {
-              elt {
-                s: "rest"
-              }
-            }
+            s: "DataSet"
           }
         }
-        stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetKeys"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetKeys"
           }
         }
-        rest_params {
-          method: GET
-          path: "/api"
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeRoot"
+          }
         }
-      }
-    }
-    endpoints {
-      key: "GET /api/{key}"
-      value {
-        name: "GET /api/{key}"
         attrs {
           key: "patterns"
           value {
@@ -313,17 +226,192 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
+          ret {
+            payload: "Keys"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api"
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/creation-times"
+      value {
+        name: "GET /api/admin/{key}/creation-times"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetCreationTimes"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
             }
-            endpoint: "GetData"
-            arg {
-              name: "key"
+          }
+        }
+        stmt {
+          ret {
+            payload: "CreationTimes"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/creation-times"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 43
+                }
+              }
             }
-            arg {
-              name: "queryTime"
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/restrictions"
+      value {
+        name: "GET /api/admin/{key}/restrictions"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetRestriction"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
             }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Restriction"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/restrictions"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 46
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/start-times"
+      value {
+        name: "GET /api/admin/{key}/start-times"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetStartTimes"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Times"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/start-times"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 40
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}"
+      value {
+        name: "GET /api/{key}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Data"
           }
         }
         rest_params {
@@ -332,19 +420,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 9
+                  line: 8
                 }
               }
             }
@@ -365,7 +444,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 9
+                  line: 8
                 }
               }
             }
@@ -379,6 +458,18 @@ apps {
       value {
         name: "GET /api/{key}/name"
         attrs {
+          key: "method_name"
+          value {
+            s: "GetDataSetName"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -389,14 +480,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetDataSetName"
-            arg {
-              name: "key"
-            }
+          ret {
+            payload: "KeyName"
           }
         }
         rest_params {
@@ -405,19 +490,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 33
+                  line: 32
                 }
               }
             }
@@ -438,59 +514,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 33
-                }
-              }
-            }
-            loc: true
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GET /api/{key}/restrictions"
-      value {
-        name: "GET /api/{key}/restrictions"
-        attrs {
-          key: "patterns"
-          value {
-            a {
-              elt {
-                s: "rest"
-              }
-            }
-          }
-        }
-        stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetRestriction"
-            arg {
-              name: "key"
-            }
-          }
-        }
-        rest_params {
-          method: GET
-          path: "/api/{key}/restrictions"
-          query_param {
-            name: "key"
-            type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
-              source_context {
-                start {
-                  line: 44
+                  line: 32
                 }
               }
             }
@@ -504,6 +528,18 @@ apps {
       value {
         name: "GET /api/{key}/schema"
         attrs {
+          key: "method_name"
+          value {
+            s: "GetSchema"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -514,17 +550,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetSchema"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "queryTime"
-            }
+          ret {
+            payload: "Schema"
           }
         }
         rest_params {
@@ -533,19 +560,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 21
+                  line: 20
                 }
               }
             }
@@ -566,7 +584,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 21
+                  line: 20
                 }
               }
             }
@@ -580,72 +598,17 @@ apps {
       value {
         name: "GET /api/{key}/schema/{startTime}"
         attrs {
-          key: "patterns"
+          key: "method_name"
           value {
-            a {
-              elt {
-                s: "rest"
-              }
-            }
+            s: "GetSchemaWithStart"
           }
         }
-        stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetSchemaWithStart"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "start"
-            }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
           }
         }
-        rest_params {
-          method: GET
-          path: "/api/{key}/schema/{startTime}"
-          query_param {
-            name: "startTime"
-            type {
-              primitive: STRING
-              source_context {
-                start {
-                  line: 26
-                }
-              }
-            }
-            loc: true
-          }
-          query_param {
-            name: "key"
-            type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
-              source_context {
-                start {
-                  line: 26
-                }
-              }
-            }
-            loc: true
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GET /api/{key}/start-timers"
-      value {
-        name: "GET /api/{key}/start-timers"
         attrs {
           key: "patterns"
           value {
@@ -657,35 +620,32 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetStartTimes"
-            arg {
-              name: "key"
-            }
+          ret {
+            payload: "Schema"
           }
         }
         rest_params {
           method: GET
-          path: "/api/{key}/start-timers"
+          path: "/api/{key}/schema/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 25
+                }
+              }
+            }
+            loc: true
+          }
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 41
+                  line: 25
                 }
               }
             }
@@ -699,6 +659,18 @@ apps {
       value {
         name: "GET /api/{key}/{startTime}"
         attrs {
+          key: "method_name"
+          value {
+            s: "GetDataWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -709,17 +681,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "GetDataWithStart"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "start"
-            }
+          ret {
+            payload: "Data"
           }
         }
         rest_params {
@@ -731,7 +694,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 14
+                  line: 13
                 }
               }
             }
@@ -740,19 +703,10 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 14
+                  line: 13
                 }
               }
             }
@@ -766,6 +720,18 @@ apps {
       value {
         name: "POST /api"
         attrs {
+          key: "method_name"
+          value {
+            s: "CreateDataSet"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeRoot"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -776,14 +742,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "CreateDataSet"
-            arg {
-              name: "DataSetPayload"
-            }
+          ret {
+            payload: "Key"
           }
         }
         rest_params {
@@ -791,13 +751,35 @@ apps {
           path: "/api"
         }
         param {
+          name: "ds"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataSetPayload"
+                }
+              }
+            }
+          }
         }
       }
     }
     endpoints {
-      key: "POST /api/{key}/subscribe"
+      key: "POST /api/admin/{key}/subscribe"
       value {
-        name: "POST /api/{key}/subscribe"
+        name: "POST /api/admin/{key}/subscribe"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutSubscription"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
         attrs {
           key: "patterns"
           value {
@@ -809,50 +791,56 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutSubscription"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "Restriction"
-            }
+          ret {
+            payload: "Subscription"
           }
         }
         rest_params {
           method: POST
-          path: "/api/{key}/subscribe"
+          path: "/api/admin/{key}/subscribe"
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 49
+                  line: 51
                 }
               }
             }
             loc: true
           }
         }
+        param {
+          name: "s"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Subscription"
+                }
+              }
+            }
+          }
+        }
       }
     }
     endpoints {
-      key: "POST /api/{key}/unsubscribe"
+      key: "POST /api/admin/{key}/unsubscribe"
       value {
-        name: "POST /api/{key}/unsubscribe"
+        name: "POST /api/admin/{key}/unsubscribe"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteSubscription"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
         attrs {
           key: "patterns"
           value {
@@ -864,42 +852,97 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "DeleteSubscription"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "Restriction"
-            }
+          action {
+            action: "return"
           }
         }
         rest_params {
           method: POST
-          path: "/api/{key}/unsubscribe"
+          path: "/api/admin/{key}/unsubscribe"
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 52
+                  line: 54
                 }
               }
             }
             loc: true
+          }
+        }
+        param {
+          name: "s"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Subscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/admin/{key}/restrictions"
+      value {
+        name: "PUT /api/admin/{key}/restrictions"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutRestriction"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Restriction"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/admin/{key}/restrictions"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 48
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "r"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Restriction"
+                }
+              }
+            }
           }
         }
       }
@@ -909,6 +952,18 @@ apps {
       value {
         name: "PUT /api/{key}"
         attrs {
+          key: "method_name"
+          value {
+            s: "PutData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
           key: "patterns"
           value {
             a {
@@ -919,17 +974,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutData"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "queryTime"
-            }
+          ret {
+            payload: "Data"
           }
         }
         rest_params {
@@ -938,23 +984,26 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 11
+                  line: 10
                 }
               }
             }
             loc: true
+          }
+        }
+        param {
+          name: "dp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataPayload"
+                }
+              }
+            }
           }
         }
       }
@@ -964,57 +1013,17 @@ apps {
       value {
         name: "PUT /api/{key}/name"
         attrs {
-          key: "patterns"
+          key: "method_name"
           value {
-            a {
-              elt {
-                s: "rest"
-              }
-            }
+            s: "PutDataSetName"
           }
         }
-        stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutDataSetName"
-            arg {
-              name: "key"
-            }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
           }
         }
-        rest_params {
-          method: PUT
-          path: "/api/{key}/name"
-          query_param {
-            name: "key"
-            type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
-              source_context {
-                start {
-                  line: 35
-                }
-              }
-            }
-            loc: true
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PUT /api/{key}/restrictions"
-      value {
-        name: "PUT /api/{key}/restrictions"
         attrs {
           key: "patterns"
           value {
@@ -1026,39 +1035,36 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutRestriction"
-            arg {
-              name: "key"
-            }
+          ret {
+            payload: "KeyName"
           }
         }
         rest_params {
           method: PUT
-          path: "/api/{key}/restrictions"
+          path: "/api/{key}/name"
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 46
+                  line: 34
                 }
               }
             }
             loc: true
+          }
+        }
+        param {
+          name: "np"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "NamePayload"
+                }
+              }
+            }
           }
         }
       }
@@ -1068,60 +1074,17 @@ apps {
       value {
         name: "PUT /api/{key}/schema"
         attrs {
-          key: "patterns"
+          key: "method_name"
           value {
-            a {
-              elt {
-                s: "rest"
-              }
-            }
+            s: "PutSchema"
           }
         }
-        stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutSchema"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "queryTime"
-            }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
           }
         }
-        rest_params {
-          method: PUT
-          path: "/api/{key}/schema"
-          query_param {
-            name: "key"
-            type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
-              source_context {
-                start {
-                  line: 23
-                }
-              }
-            }
-            loc: true
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PUT /api/{key}/schema/{startTime}"
-      value {
-        name: "PUT /api/{key}/schema/{startTime}"
         attrs {
           key: "patterns"
           value {
@@ -1133,17 +1096,69 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
+          ret {
+            payload: "Schema"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}/schema"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 22
+                }
+              }
             }
-            endpoint: "PutSchemaWithStart"
-            arg {
-              name: "key"
+            loc: true
+          }
+        }
+        param {
+          name: "sp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "SchemaPayload"
+                }
+              }
             }
-            arg {
-              name: "start"
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}/schema/{startTime}"
+      value {
+        name: "PUT /api/{key}/schema/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutSchemaWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
             }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Schema"
           }
         }
         rest_params {
@@ -1155,7 +1170,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 28
+                  line: 27
                 }
               }
             }
@@ -1164,23 +1179,26 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 28
+                  line: 27
                 }
               }
             }
             loc: true
+          }
+        }
+        param {
+          name: "sp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "SchemaPayload"
+                }
+              }
+            }
           }
         }
       }
@@ -1189,6 +1207,18 @@ apps {
       key: "PUT /api/{key}/{startTime}"
       value {
         name: "PUT /api/{key}/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutDataWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
         attrs {
           key: "patterns"
           value {
@@ -1200,17 +1230,8 @@ apps {
           }
         }
         stmt {
-          call {
-            target {
-              part: "Storer"
-            }
-            endpoint: "PutDataWithStart"
-            arg {
-              name: "key"
-            }
-            arg {
-              name: "start"
-            }
+          ret {
+            payload: "Data"
           }
         }
         rest_params {
@@ -1222,7 +1243,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 16
+                  line: 15
                 }
               }
             }
@@ -1231,511 +1252,54 @@ apps {
           query_param {
             name: "key"
             type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "strng"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 16
+                  line: 15
                 }
               }
             }
             loc: true
           }
         }
-      }
-    }
-  }
-}
-apps {
-  key: "Storer"
-  value {
-    name {
-      part: "Storer"
-    }
-    endpoints {
-      key: "CreateDataSet"
-      value {
-        name: "CreateDataSet"
-        stmt {
-          ret {
-            payload: "(Key, error)"
-          }
-        }
         param {
-          name: "DataSetPayload"
+          name: "dp"
           type {
-            no_type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataPayload"
+                }
+              }
             }
           }
         }
       }
     }
-    endpoints {
-      key: "DeleteData"
+    types {
+      key: "CreationStartTime"
       value {
-        name: "DeleteData"
-        stmt {
-          ret {
-            payload: "error"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "startTime string"
-          type {
-            no_type {
+        tuple {
+          attr_defs {
+            key: "CreationTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 93
+                }
+              }
             }
           }
-        }
-      }
-    }
-    endpoints {
-      key: "DeleteDataSet"
-      value {
-        name: "DeleteDataSet"
-        stmt {
-          ret {
-            payload: "error"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "DeleteSchema"
-      value {
-        name: "DeleteSchema"
-        stmt {
-          ret {
-            payload: "error"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "startTime string"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "DeleteSubscription"
-      value {
-        name: "DeleteSubscription"
-        stmt {
-          ret {
-            payload: "error"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "s Subscription"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetCreationTimes"
-      value {
-        name: "GetCreationTimes"
-        stmt {
-          ret {
-            payload: "(CreationTimes, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetData"
-      value {
-        name: "GetData"
-        stmt {
-          ret {
-            payload: "(Data, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "queryTime string"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetDataSetName"
-      value {
-        name: "GetDataSetName"
-        stmt {
-          ret {
-            payload: "(KeyName, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetDataWithStart"
-      value {
-        name: "GetDataWithStart"
-        stmt {
-          ret {
-            payload: "(Data, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "startTime string"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetKeys"
-      value {
-        name: "GetKeys"
-        stmt {
-          ret {
-            payload: "(Keys, error)"
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetRestriction"
-      value {
-        name: "GetRestriction"
-        stmt {
-          ret {
-            payload: "(Restriction, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetSchema"
-      value {
-        name: "GetSchema"
-        stmt {
-          ret {
-            payload: "(Schema, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "qTime string"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetSchemaWithStart"
-      value {
-        name: "GetSchemaWithStart"
-        stmt {
-          ret {
-            payload: "(Schema, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "startTime string"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetStartTimes"
-      value {
-        name: "GetStartTimes"
-        stmt {
-          ret {
-            payload: "(Times, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "GetSubscriptions"
-      value {
-        name: "GetSubscriptions"
-        stmt {
-          ret {
-            payload: "([]Subscription, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutData"
-      value {
-        name: "PutData"
-        stmt {
-          ret {
-            payload: "(Data, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "dp DataPayload"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutDataSetName"
-      value {
-        name: "PutDataSetName"
-        stmt {
-          ret {
-            payload: "(KeyName, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "NamePayload"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutDataWithStart"
-      value {
-        name: "PutDataWithStart"
-        stmt {
-          ret {
-            payload: "(Data, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "start string"
-          type {
-            no_type {
-            }
-          }
-        }
-        param {
-          name: "dp DataPayload"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutRestriction"
-      value {
-        name: "PutRestriction"
-        stmt {
-          ret {
-            payload: "(Restriction, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "r Restriction"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutSchema"
-      value {
-        name: "PutSchema"
-        stmt {
-          ret {
-            payload: "(Schema, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "sp SchemaPayload"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutSchemaWithStart"
-      value {
-        name: "PutSchemaWithStart"
-        stmt {
-          ret {
-            payload: "(Schema, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "start string"
-          type {
-            no_type {
-            }
-          }
-        }
-        param {
-          name: "sp SchemaPayload"
-          type {
-            no_type {
-            }
-          }
-        }
-      }
-    }
-    endpoints {
-      key: "PutSubscription"
-      value {
-        name: "PutSubscription"
-        stmt {
-          ret {
-            payload: "(Subscription, error)"
-          }
-        }
-        param {
-          name: "key"
-          type {
-            primitive: STRING
-          }
-        }
-        param {
-          name: "s Subscription"
-          type {
-            no_type {
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 94
+                }
+              }
             }
           }
         }
@@ -1748,37 +1312,20 @@ apps {
           attr_defs {
             key: "Data"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"data\""
-                    }
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
                   }
+                  path: "CreationTimes"
                 }
-              }
-              set {
-                type_ref {
-                  context {
-                    appname {
-                      part: "Storer"
-                    }
-                    path: "CreationTimes"
-                  }
-                  ref {
-                    path: "Time"
-                  }
-                }
-                source_context {
-                  start {
-                    line: 152
-                  }
+                ref {
+                  path: "map of string:CreationStartTime"
                 }
               }
               source_context {
                 start {
-                  line: 152
+                  line: 97
                 }
               }
             }
@@ -1786,37 +1333,20 @@ apps {
           attr_defs {
             key: "Schema"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"data\""
-                    }
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
                   }
+                  path: "CreationTimes"
                 }
-              }
-              set {
-                type_ref {
-                  context {
-                    appname {
-                      part: "Storer"
-                    }
-                    path: "CreationTimes"
-                  }
-                  ref {
-                    path: "Time"
-                  }
-                }
-                source_context {
-                  start {
-                    line: 153
-                  }
+                ref {
+                  path: "map of string:CreationStartTime"
                 }
               }
               source_context {
                 start {
-                  line: 153
+                  line: 98
                 }
               }
             }
@@ -1831,30 +1361,10 @@ apps {
           attr_defs {
             key: "CreationTime"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"creation-time\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "Data"
-                }
-                ref {
-                  path: "Time"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 117
+                  line: 60
                 }
               }
             }
@@ -1864,18 +1374,14 @@ apps {
             value {
               primitive: STRING
               attrs {
-                key: "patterns"
+                key: "json"
                 value {
-                  a {
-                    elt {
-                      s: "json:\"data\""
-                    }
-                  }
+                  s: "data"
                 }
               }
               source_context {
                 start {
-                  line: 116
+                  line: 59
                 }
               }
             }
@@ -1883,30 +1389,10 @@ apps {
           attr_defs {
             key: "StartTime"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"start-time\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "Data"
-                }
-                ref {
-                  path: "Time"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 115
+                  line: 58
                 }
               }
             }
@@ -1921,30 +1407,10 @@ apps {
           attr_defs {
             key: "Data"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"data\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "DataPayload"
-                }
-                ref {
-                  path: "interface{}"
-                }
-              }
+              primitive: ANY
               source_context {
                 start {
-                  line: 166
+                  line: 109
                 }
               }
             }
@@ -1959,30 +1425,16 @@ apps {
           attr_defs {
             key: "JSONSchema"
             value {
+              primitive: ANY
               attrs {
-                key: "patterns"
+                key: "json"
                 value {
-                  a {
-                    elt {
-                      s: "json:\"schema\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "DataSetPayload"
-                }
-                ref {
-                  path: "interface{}"
+                  s: "schema"
                 }
               }
               source_context {
                 start {
-                  line: 160
+                  line: 103
                 }
               }
             }
@@ -1991,19 +1443,9 @@ apps {
             key: "Name"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"name\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 158
+                  line: 101
                 }
               }
             }
@@ -2013,18 +1455,14 @@ apps {
             value {
               primitive: STRING
               attrs {
-                key: "patterns"
+                key: "json"
                 value {
-                  a {
-                    elt {
-                      s: "json:\"start-time\""
-                    }
-                  }
+                  s: "start-time"
                 }
               }
               source_context {
                 start {
-                  line: 159
+                  line: 102
                 }
               }
             }
@@ -2040,19 +1478,9 @@ apps {
             key: "Key"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"key\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 141
+                  line: 82
                 }
               }
             }
@@ -2068,19 +1496,9 @@ apps {
             key: "Key"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"key\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 144
+                  line: 85
                 }
               }
             }
@@ -2089,19 +1507,9 @@ apps {
             key: "Name"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"name\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 145
+                  line: 86
                 }
               }
             }
@@ -2116,27 +1524,14 @@ apps {
           attr_defs {
             key: "Keys"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"keys\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 79
                     }
                   }
-                }
-              }
-              set {
-                primitive: STRING
-                source_context {
-                  start {
-                    line: 138
-                  }
-                }
-              }
-              source_context {
-                start {
-                  line: 138
                 }
               }
             }
@@ -2152,19 +1547,9 @@ apps {
             key: "Name"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"name\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 163
+                  line: 106
                 }
               }
             }
@@ -2179,27 +1564,14 @@ apps {
           attr_defs {
             key: "AdminScopes"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"admin-scopes\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 76
                     }
                   }
-                }
-              }
-              set {
-                primitive: STRING
-                source_context {
-                  start {
-                    line: 135
-                  }
-                }
-              }
-              source_context {
-                start {
-                  line: 135
                 }
               }
             }
@@ -2208,19 +1580,9 @@ apps {
             key: "DataFrozenUntil"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"data-frozen-until\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 132
+                  line: 73
                 }
               }
             }
@@ -2228,27 +1590,14 @@ apps {
           attr_defs {
             key: "ReadScopes"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"read-scopes\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 74
                     }
                   }
-                }
-              }
-              set {
-                primitive: STRING
-                source_context {
-                  start {
-                    line: 133
-                  }
-                }
-              }
-              source_context {
-                start {
-                  line: 133
                 }
               }
             }
@@ -2256,27 +1605,14 @@ apps {
           attr_defs {
             key: "ReadWriteScopes"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"read-write-scopes\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 75
                     }
                   }
-                }
-              }
-              set {
-                primitive: STRING
-                source_context {
-                  start {
-                    line: 134
-                  }
-                }
-              }
-              source_context {
-                start {
-                  line: 134
                 }
               }
             }
@@ -2285,19 +1621,9 @@ apps {
             key: "SchemaFrozenUntil"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"schema-frozen-until\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 131
+                  line: 72
                 }
               }
             }
@@ -2312,30 +1638,10 @@ apps {
           attr_defs {
             key: "CreationTime"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"creation-time\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "Schema"
-                }
-                ref {
-                  path: "Time"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 123
+                  line: 65
                 }
               }
             }
@@ -2345,18 +1651,14 @@ apps {
             value {
               primitive: STRING
               attrs {
-                key: "patterns"
+                key: "json"
                 value {
-                  a {
-                    elt {
-                      s: "json:\"schema\""
-                    }
-                  }
+                  s: "schema"
                 }
               }
               source_context {
                 start {
-                  line: 122
+                  line: 64
                 }
               }
             }
@@ -2364,33 +1666,19 @@ apps {
           attr_defs {
             key: "StartTime"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"start-time\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "Schema"
-                }
-                ref {
-                  path: "Time"
-                }
-              }
+              primitive: STRING
               source_context {
                 start {
-                  line: 121
+                  line: 63
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Schema holds JSON Schema to validate Data against, a name for key creation."
           }
         }
       }
@@ -2402,30 +1690,10 @@ apps {
           attr_defs {
             key: "Schema"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"schema\""
-                    }
-                  }
-                }
-              }
-              type_ref {
-                context {
-                  appname {
-                    part: "Storer"
-                  }
-                  path: "SchemaPayload"
-                }
-                ref {
-                  path: "interface{}"
-                }
-              }
+              primitive: ANY
               source_context {
                 start {
-                  line: 169
+                  line: 112
                 }
               }
             }
@@ -2441,19 +1709,9 @@ apps {
             key: "SecreteToken"
             value {
               primitive: STRING
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"secrete-token\""
-                    }
-                  }
-                }
-              }
               source_context {
                 start {
-                  line: 128
+                  line: 69
                 }
               }
             }
@@ -2463,35 +1721,14 @@ apps {
             value {
               primitive: STRING
               attrs {
-                key: "patterns"
+                key: "json"
                 value {
-                  a {
-                    elt {
-                      s: "json:\"url\""
-                    }
-                  }
+                  s: "url"
                 }
               }
               source_context {
                 start {
-                  line: 127
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    types {
-      key: "Time"
-      value {
-        tuple {
-          attr_defs {
-            key: "date"
-            value {
-              source_context {
-                start {
-                  line: 109
+                  line: 68
                 }
               }
             }
@@ -2506,37 +1743,14 @@ apps {
           attr_defs {
             key: "Data"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"data\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 89
                     }
                   }
-                }
-              }
-              set {
-                type_ref {
-                  context {
-                    appname {
-                      part: "Storer"
-                    }
-                    path: "Times"
-                  }
-                  ref {
-                    path: "Time"
-                  }
-                }
-                source_context {
-                  start {
-                    line: 148
-                  }
-                }
-              }
-              source_context {
-                start {
-                  line: 148
                 }
               }
             }
@@ -2544,37 +1758,76 @@ apps {
           attr_defs {
             key: "Schema"
             value {
-              attrs {
-                key: "patterns"
-                value {
-                  a {
-                    elt {
-                      s: "json:\"schema\""
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 90
                     }
                   }
                 }
               }
-              set {
-                type_ref {
-                  context {
-                    appname {
-                      part: "Storer"
-                    }
-                    path: "Times"
-                  }
-                  ref {
-                    path: "Time"
-                  }
-                }
-                source_context {
-                  start {
-                    line: 149
-                  }
-                }
-              }
+            }
+          }
+        }
+      }
+    }
+    types {
+      key: "UpdateEvent"
+      value {
+        tuple {
+          attr_defs {
+            key: "Data"
+            value {
+              primitive: ANY
               source_context {
                 start {
-                  line: 149
+                  line: 117
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Deleted"
+            value {
+              primitive: BOOL
+              source_context {
+                start {
+                  line: 119
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Key"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 115
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Schema"
+            value {
+              primitive: ANY
+              source_context {
+                start {
+                  line: 118
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 116
                 }
               }
             }

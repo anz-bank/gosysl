@@ -1,0 +1,13 @@
+language: go
+
+install:
+  - go get -u github.com/golang/lint/golint
+
+script:
+  - go get -d -t
+  - go vet
+  - golint -set_exit_status
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

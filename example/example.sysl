@@ -1,178 +1,120 @@
-# TODO(juliaogris) : authorizer middleware
-RestApi:
-    /api:
-        GET:
-            Storer <- GetKeys()
-        POST (DataSetPayload):
-            Storer <- CreateDataSet(DataSetPayload)
-    /api/{key<:strng}:
-        GET ?time={queryTime<:string}:
-             Storer <- GetData(key, queryTime)
-        PUT:
-             Storer <- PutData(key, queryTime)
-    /api/{key<:strng}/{startTime<:string}:
-        GET:
-             Storer <- GetDataWithStart(key, start)
-        PUT:
-             Storer <- PutDataWithStart(key, start)
-        DELETE:
-             Storer <- DeleteData(key, start)
-    /api/{key<:strng}/schema:
-        GET ?time={queryTime<:string}:
-             Storer <- GetSchema(key, queryTime)
-        PUT:
-             Storer <- PutSchema(key, queryTime)
-    /api/{key<:strng}/schema/{startTime<:string}:
-        GET:
-             Storer <- GetSchemaWithStart(key, start)
-        PUT:
-             Storer <- PutSchemaWithStart(key, start)
-        DELETE:
-             Storer <- DeleteSchema(key, start)
-    /api/{key<:strng}/name:
-        GET ?time={queryTime<:string}:
-             Storer <- GetDataSetName(key)
-        PUT:
-             Storer <- PutDataSetName(key)
-    /api/{key<:strng}:
-        DELETE:
-            Storer <- DeleteDataSet(key)
-    /api/{key<:strng}/start-timers:
-        GET:
-             Storer <- GetStartTimes(key)
-    /api/{key<:strng}/restrictions:
-        GET:
-             Storer <- GetRestriction(key)
-        PUT:
-             Storer <- PutRestriction(key)
-    /api/{key<:strng}/subscribe:
-        POST:
-             Storer <- PutSubscription(key, Restriction)
-    /api/{key<:strng}/unsubscribe:
-        POST:
-             Storer <- DeleteSubscription(key, Restriction)
-
-Storer:
-    # DataSet
-    GetKeys():
-        return (Keys, error)
-    CreateDataSet(DataSetPayload):
-        return (Key, error)
-    GetDataSetName(key<:string):
-        return (KeyName, error)
-    PutDataSetName(key<:string, NamePayload):
-        return (KeyName, error)
-    GetStartTimes(key <: string):
-        return (Times, error)
-    GetCreationTimes(key <: string):
-        return (CreationTimes, error)
-
-    # Data
-    GetDataWithStart(key <: string, startTime string):
-        return (Data, error)
-    GetData(key <: string, queryTime string):
-        return (Data, error)
-    PutData(key <: string, dp DataPayload):
-        return (Data, error)
-    PutDataWithStart(key <: string, start string, dp DataPayload):
-        return (Data, error)
-    DeleteData(key <: string, startTime string):
-        return error
-
-    # Schema
-    GetSchemaWithStart(key <: string, startTime string):
-        return (Schema, error)
-    GetSchema(key <: string, qTime string):
-        return (Schema, error)
-    PutSchema(key <: string, sp SchemaPayload):
-        return (Schema, error)
-    PutSchemaWithStart(key <: string, start string, sp SchemaPayload):
-        return (Schema, error)
-    DeleteSchema(key <: string, startTime string):
-        return error
-
-    # Admin
-    DeleteDataSet(key <: string):
-        return error
-    GetSubscriptions(key <: string):
-        return ([]Subscription, error)
-    PutSubscription(key <: string, s Subscription):
-        return (Subscription, error)
-    DeleteSubscription(key <: string, s Subscription):
-        return error
-    GetRestriction(key <: string):
-        return (Restriction, error)
-    PutRestriction(key <: string, r Restriction):
-        return (Restriction, error)
-
-    !type Time:
-        date
-
-    !type Keys:
-        Keys <: set of string [~json:"keys"]
+RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is cool"]:
+    /api [middleware="AuthorizeRoot"]:
+        GET [method_name="GetKeys", method_doc="DataSet"]:
+            return Keys
+        POST (ds <: DataSetPayload) [method_name="CreateDataSet"]:
+            return Key
+    /api/{key<:string}  [middleware="AuthorizeDataSet"]:
+        GET ?time={queryTime<:string} [method_name="GetData"]:
+            return Data
+        PUT(dp <: DataPayload) [method_name="PutData"]:
+            return Data
+        /{startTime<:string}:
+            GET [method_name="GetDataWithStart"]:
+                return Data
+            PUT(dp <: DataPayload) [method_name="PutDataWithStart"]:
+                return Data
+            DELETE [method_name="DeleteData"]:
+                return
+        /schema:
+            GET ?time={queryTime<:string} [method_name="GetSchema"]:
+                return Schema
+            PUT(sp <: SchemaPayload) [method_name="PutSchema"]:
+                return Schema
+        /schema/{startTime<:string}:
+            GET [method_name="GetSchemaWithStart"]:
+                return Schema
+            PUT(sp <: SchemaPayload) [method_name="PutSchemaWithStart"]:
+                return Schema
+            DELETE [method_name="DeleteSchema"]:
+                return
+        /name:
+            GET ?time={queryTime<:string} [method_name="GetDataSetName"]:
+                return KeyName
+            PUT(np <: NamePayload) [method_name="PutDataSetName"]:
+                return KeyName
+    /api/admin/{key<:string}  [middleware="AuthorizeDataSet"]:
+        DELETE [method_name="DeleteDataSet"]:
+            return
+        /start-times:
+            GET [method_name="GetStartTimes"]:
+                return Times
+        /creation-times:
+            GET [method_name="GetCreationTimes"]:
+                return CreationTimes
+        /restrictions:
+            GET [method_name="GetRestriction"]:
+                return Restriction
+            PUT(r <: Restriction) [method_name="PutRestriction"]:
+                return Restriction
+        /subscribe:
+            POST(s <: Subscription) [method_name="PutSubscription"]:
+                return Subscription
+        /unsubscribe:
+            POST(s <: Subscription) [method_name="DeleteSubscription"]:
+                return
 
     !type Data:
-        StartTime    <: Time   [~json:"start-time"]
-        JSONData     <: string [~json:"data"]
-        CreationTime <: Time   [~json:"creation-time"]
+        StartTime    <: STRING
+        JSONData     <: STRING [json="data"]
+        CreationTime <: STRING
 
-
-    !type Schema:
-        StartTime    <: Time   [~json:"start-time"]
-        JSONSchema   <: string [~json:"schema"]
-        CreationTime <: Time   [~json:"creation-time"]
-
+    !type Schema [doc="Schema holds JSON Schema to validate Data against, a name for key creation."]:
+        StartTime    <: STRING
+        JSONSchema   <: STRING [json="schema"]
+        CreationTime <: STRING
 
     !type Subscription:
-        URL          <: string [~json:"url"]
-        SecreteToken <: string [~json:"secrete-token"]
+        URL          <: STRING [json="url"]
+        SecreteToken <: STRING
 
     !type Restriction:
-        SchemaFrozenUntil <: string   [~json:"schema-frozen-until"]
-        DataFrozenUntil   <: string   [~json:"data-frozen-until"]
-        ReadScopes        <: set of string [~json:"read-scopes"]
-        ReadWriteScopes   <: set of string [~json:"read-write-scopes"]
-        AdminScopes       <: set of string [~json:"admin-scopes"]
+        SchemaFrozenUntil <: STRING
+        DataFrozenUntil   <: STRING
+        ReadScopes(0..)   <: STRING
+        ReadWriteScopes(0..)   <: STRING
+        AdminScopes(0..)       <: STRING
 
     !type Keys:
-        Keys <: set of string [~json:"keys"]
+        Keys(0..) <: STRING
 
     !type Key:
-        Key <: string [~json:"key"]
+        Key <: STRING
 
     !type KeyName:
-        Key  <: string [~json:"key"]
-        Name <: string [~json:"name"]
+        Key  <: STRING
+        Name <: STRING
 
     !type Times:
-        Data   <: set of Time [~json:"data"]
-        Schema <: set of Time [~json:"schema"]
+        Data(0..)   <: STRING
+        Schema(0..) <: STRING
+
+    !type CreationStartTime:
+        CreationTime <: STRING
+        StartTime <: STRING
 
     !type CreationTimes:
-        Data   <: set of Time [~json:"data"]
-        Schema <: set of Time [~json:"data"]
-# TODO(juliaogris) Data map[Time]Time [~json:"data"]
-# TODO(juliaogris) Schema map[Time]Time [~json:"schema"]
+        Data   <: map of string:CreationStartTime
+        Schema <: map of string:CreationStartTime
 
     !type DataSetPayload:
-        Name         <: string      [~json:"name"]
-        StartTimeStr <: string      [~json:"start-time"]
-        JSONSchema   <: interface{} [~json:"schema"]
+        Name         <: STRING
+        StartTimeStr <: STRING [json="start-time"]
+        JSONSchema   <: ANY [json="schema"]
 
     !type NamePayload:
-        Name <: string [~json:"name"]
+        Name <: STRING
 
     !type DataPayload:
-        Data <: interface{} [~json:"data"]
+        Data <: any
 
     !type SchemaPayload:
-        Schema <: interface{} [~json:"schema"]
+        Schema <: any
 
-Authorizer:
-# TODO(juliaogris) Data types?
-    AuthorizeRoot(next <: http.Handler):
-        return http.Handler
-    AuthorizeDataSet(next <: http.Handler):
-        return http.Handler
-    AuthorizeAdmin(next <: http.Handler):
-        return http.Handler
+    !type UpdateEvent:
+        Key <: STRING
+        StartTime <: STRING
+        Data <: ANY
+        Schema <: ANY
+        Deleted <: bool
+
