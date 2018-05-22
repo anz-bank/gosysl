@@ -1,10 +1,10 @@
-£2
-RestApió2
+Ê;
+RestApi⁄;
 	
-RestApi"
-json_map_fields"dashes"
-	interface"Storer"!
-interface_doc"Storer is cool*Ï
+RestApi"
+	interface"Storer"R
+interface_docA"?Storer abstracts all required RefData persistence and retrieval"
+json_property_separator"-*Ï
 GET /api/{key}/{startTime}Õ
 GET /api/{key}/{startTime}"!
 method_name"GetDataWithStart"
@@ -271,8 +271,8 @@ middleware"AuthorizeDataSet:
 
 middleware"AuthorizeDataSet:	B
 TimesB4/api/admin/{key}/start-times
-key	ö( 2Æ
-Restrictionûõ
+key	ö( 2å
+Restriction¸õ
 
 DataFrozenUntil	öI
 
@@ -286,15 +286,18 @@ middleware"AuthorizeDataSet:	B
 
 
 ReadScopes"
-	öJ2!
-Keys
+	öJB\
+docU"SRestriction contains scope access restriction and frozen times for schema and data.2\
+KeysT
 
 Keys"
-	öO2$
-NamePayload
+	öOB9
+doc2"0Keys is JSON result type for getKeys in REST API2v
+NamePayloadg
 
-Name	öj2É
-DataSetPayloadqo
+Name	öjBP
+docI"GNamePayload is JSON payload on REST API request to update data set name2ÿ
+DataSetPayload≈o
 /
 StartTimeStrB
 json"
@@ -304,15 +307,19 @@ start-timeöf
 )
 
 JSONSchemaB
-json"schemaög2;
-Times20
-
-Data"
-	öY
+json"schemaögBR
+docK"IDataSetPayload is JSON payload on REST API request to create new data set2¢
+TimesòF
++
+Data#"!
+B
+json"
+data-timesöY
 
 Schema"
-	öZ2y
-UpdateEventjh
+	öZBN
+docG"ETimes contains schema and data times, used to get StartTimes for both2∆
+UpdateEvent∂h
 
 Deleted	öw
 
@@ -322,43 +329,52 @@ JSONSchemaB
 
 Key	ös
 
-Schema	öv22
-KeyName'%
+Schema	övBJ
+docC"AUpdateEvent holds all information necessary to post to subscribes2Å
+KeyNamev%
 
 Name	öV
 
-Key	öU2(
-SchemaPayload
+Key	öUBM
+docF"DKeyName is JSON result type for get and put dataDetNamre in REST API2u
+SchemaPayloadd
 
-Schema	öp2
-Key
+Schema	öpBK
+docD"BSchemaPayload is JSON payload on REST API request to update schema2[
+KeyT
 
-Key	öR2J
-CreationStartTime53
+Key	öRB>
+doc7"5Key is JSON result type for createDataSet in REST API2¶
+CreationStartTimeê3
 
 CreationTime	ö]
 
-	StartTime	ö^2$
-DataPayload
+	StartTime	ö^BY
+docR"PCreationStartTime contains start and creation time for a schema or data snapshot2m
+DataPayload^
 
-Data	öm2N
-Subscription><
+Data	ömBG
+doc@">DataPayload is JSON payload on REST API request to update data2ù
+Subscriptionå<
 
 URLB
 json"urlöD
 
-SecreteToken	öE2d
-Data\Z
+SecreteToken	öEBL
+docE"CSubscription holds external endpoint values for change notification2±
+Data®Z
 
 CreationTime	ö<
 %
 JSONDataB
 json"dataö;
 
-	StartTime	ö:2ª
-CreationTimes©¶
-P
-DataHJ?
+	StartTime	ö:BJ
+docC"AData holds JSON data valid from StartTime created at CreationTime2≥
+CreationTimes°ø
+i
+DataaB
+json"data-time-mapJ?
 
 	
 RestApiCreationTimes!map of string:CreationStartTimeöa
@@ -366,7 +382,8 @@ R
 SchemaHJ?
 
 	
-RestApiCreationTimes!map of string:CreationStartTimeöb2¡
+RestApiCreationTimes!map of string:CreationStartTimeöbB]
+docV"TCreationTimes contains schema and data times maps, used to StartTime to CreationTims2¡
 Schema∂^
 
 CreationTime	öA

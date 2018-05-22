@@ -96,6 +96,16 @@ func TestGenSimpleType(tt *testing.T) {
 	assert.Error(err)
 }
 
+func TestSplitUppercase(tt *testing.T) {
+	assert := assert.New(tt)
+
+	assert.Equal([]string{"a"}, SplitUppercase("a"))
+	assert.Equal([]string{"abc"}, SplitUppercase("abc"))
+	assert.Equal([]string{"abc", "xyz"}, SplitUppercase("AbcXyz"))
+	assert.Equal([]string{"a", "b", "c"}, SplitUppercase("ABC"))
+	assert.Equal([]string{"a", "b", "c"}, SplitUppercase("aBC"))
+}
+
 func TestGenStruct(tt *testing.T) {
 	assert := assert.New(tt)
 
@@ -108,18 +118,21 @@ func TestGenStruct(tt *testing.T) {
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 1}},
 	}
 
-	str, err := GenStruct("DataPayload", ttype)
+	str, err := GenStruct("DataPayload", ttype, "")
 	assert.NoError(err)
-	expected, _ := format.Source([]byte("type DataPayload struct {\nData interface{}\n}\n"))
+	expected, _ := format.Source([]byte("type DataPayload struct {\nData interface{} `json:\"Data\"`\n}\n"))
 	assert.Equal(string(expected), str)
 
-	attrDefs["Name"] = &pb.Type{
+	attrDefs["LastName"] = &pb.Type{
 		Type:          &pb.Type_Primitive_{Primitive: pb.Type_STRING},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 2}},
 	}
-	str, err = GenStruct("DataPayload", ttype)
+	str, err = GenStruct("DataPayload", ttype, "-")
 	assert.NoError(err)
-	expectedSrc := "type DataPayload struct {\nData interface{} \nName string\n}\n"
+	expectedSrc := `type DataPayload struct {
+			Data interface{} ` + "`json:\"data\"`" + `
+			LastName string  ` + "`json:\"last-name\"`" + `
+		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 
@@ -128,14 +141,13 @@ func TestGenStruct(tt *testing.T) {
 		Type:          &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 3}},
 	}
-	str, err = GenStruct("DataPayload", ttype)
+	str, err = GenStruct("DataPayload", ttype, "__")
 	assert.NoError(err)
 	expectedSrc = `type DataPayload struct {
-		Data interface{} 
-		Name string
-		MyField MyType
-	}
-`
+			Data interface{} ` + "`json:\"data\"`" + `
+			LastName string  ` + "`json:\"last__name\"`" + `
+			MyField MyType   ` + "`json:\"my__field\"`" + `
+		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 
@@ -147,15 +159,14 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["StringList"] = &pb.Type{
 		Type: typeList,
 	}
-	str, err = GenStruct("DataPayload", ttype)
+	str, err = GenStruct("DataPayload", ttype, "")
 	assert.NoError(err)
 	expectedSrc = `type DataPayload struct {
-		Data interface{} 
-		Name string
-		MyField MyType
-		StringList []string
-	}
-`
+			Data interface{}   ` + "`json:\"Data\"`" + `
+			LastName string    ` + "`json:\"LastName\"`" + `
+			MyField MyType     ` + "`json:\"MyField\"`" + `
+			StringList []string` + "`json:\"StringList\"`" + `
+		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 
@@ -167,16 +178,15 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["MyList"] = &pb.Type{
 		Type: typeList,
 	}
-	str, err = GenStruct("DataPayload", ttype)
+	str, err = GenStruct("DataPayload", ttype, "-")
 	assert.NoError(err)
 	expectedSrc = `type DataPayload struct {
-		Data interface{} 
-		Name string
-		MyField MyType
-		MyList []MyType
-		StringList []string
-	}
-`
+			Data interface{}   ` + "`json:\"data\"`" + `
+			LastName string    ` + "`json:\"last-name\"`" + `
+			MyField MyType     ` + "`json:\"my-field\"`" + `
+			MyList []MyType    ` + "`json:\"my-list\"`" + `
+			StringList []string` + "`json:\"string-list\"`" + `
+		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 
@@ -187,17 +197,16 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["StringSet"] = &pb.Type{
 		Type: &pb.Type_Set{Set: strType2},
 	}
-	str, err = GenStruct("YYY", ttype)
+	str, err = GenStruct("YYY", ttype, "")
 	assert.NoError(err)
 	expectedSrc = `type YYY struct {
-		Data interface{} 
-		Name string
-		MyField MyType
-		MyList []MyType
-		StringSet map[string]interface{}
-		StringList []string
-	}
-`
+			Data interface{}                 ` + "`json:\"Data\"`" + `
+			LastName string                  ` + "`json:\"LastName\"`" + `
+			MyField MyType                   ` + "`json:\"MyField\"`" + `
+			MyList []MyType                  ` + "`json:\"MyList\"`" + `
+			StringSet map[string]interface{} ` + "`json:\"StringSet\"`" + `
+			StringList []string              ` + "`json:\"StringList\"`" + `
+		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 }
@@ -215,20 +224,20 @@ func TestGentypesCornerCases(tt *testing.T) {
 	types := map[string]*pb.Type{"x": &pb.Type{}}
 	_, err = NamesSortedBySourceContext(types)
 	assert.Error(err)
-	_, err = GenTypes(types)
+	_, err = GenTypes(types, "")
 	assert.Error(err)
 	module.Apps = map[string]*pb.Application{"x": &pb.Application{Types: types}}
 	_, err = Generate(module, "")
 	assert.Error(err)
 
-	_, err = GenStruct("x", &pb.Type{})
+	_, err = GenStruct("x", &pb.Type{}, "-")
 	assert.Error(err)
 
 	attrDefs := map[string]*pb.Type{}
 	typeTuple := &pb.Type_Tuple_{Tuple: &pb.Type_Tuple{AttrDefs: attrDefs}}
 	ttype := &pb.Type{Type: typeTuple}
 	attrDefs["Data"] = &pb.Type{}
-	_, err = GenStruct("DataPayload", ttype)
+	_, err = GenStruct("DataPayload", ttype, "")
 	assert.Error(err)
 
 	ref := &pb.Scope{Path: []string{"1", "2"}}
@@ -236,8 +245,8 @@ func TestGentypesCornerCases(tt *testing.T) {
 		Type:          &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 3}},
 	}
-	_, err = GenStruct("DataPayload", ttype)
+	_, err = GenStruct("DataPayload", ttype, "")
 	assert.Error(err)
-	_, err = GenTypes(map[string]*pb.Type{"x": ttype})
+	_, err = GenTypes(map[string]*pb.Type{"x": ttype}, "-")
 	assert.Error(err)
 }

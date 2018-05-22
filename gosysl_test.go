@@ -11,75 +11,103 @@ import (
 
 var expectedRest = `package mypkg
 
+// Data holds JSON data valid from StartTime created at CreationTime
 type Data struct {
-	StartTime    string
-	JSONData     string
-	CreationTime string
+	StartTime    string ` + "`" + `json:"start-time"` + "`" + `
+	JSONData     string ` + "`" + `json:"data"` + "`" + `
+	CreationTime string ` + "`" + `json:"creation-time"` + "`" + `
 }
+
+// Schema holds JSON Schema to validate Data against, a name for key creation.
 type Schema struct {
-	StartTime    string
-	JSONSchema   string
-	CreationTime string
+	StartTime    string ` + "`" + `json:"start-time"` + "`" + `
+	JSONSchema   string ` + "`" + `json:"schema"` + "`" + `
+	CreationTime string ` + "`" + `json:"creation-time"` + "`" + `
 }
+
+// Subscription holds external endpoint values for change notification
 type Subscription struct {
-	URL          string
-	SecreteToken string
+	URL          string ` + "`" + `json:"url"` + "`" + `
+	SecreteToken string ` + "`" + `json:"secrete-token"` + "`" + `
 }
+
+// Restriction contains scope access restriction and frozen times for schema and data.
 type Restriction struct {
-	SchemaFrozenUntil string
-	DataFrozenUntil   string
-	ReadScopes        []string
-	ReadWriteScopes   []string
-	AdminScopes       []string
+	SchemaFrozenUntil string   ` + "`" + `json:"schema-frozen-until"` + "`" + `
+	DataFrozenUntil   string   ` + "`" + `json:"data-frozen-until"` + "`" + `
+	ReadScopes        []string ` + "`" + `json:"read-scopes"` + "`" + `
+	ReadWriteScopes   []string ` + "`" + `json:"read-write-scopes"` + "`" + `
+	AdminScopes       []string ` + "`" + `json:"admin-scopes"` + "`" + `
 }
+
+// Keys is JSON result type for getKeys in REST API
 type Keys struct {
-	Keys []string
+	Keys []string ` + "`" + `json:"keys"` + "`" + `
 }
+
+// Key is JSON result type for createDataSet in REST API
 type Key struct {
-	Key string
+	Key string ` + "`" + `json:"key"` + "`" + `
 }
+
+// KeyName is JSON result type for get and put dataDetNamre in REST API
 type KeyName struct {
-	Key  string
-	Name string
+	Key  string ` + "`" + `json:"key"` + "`" + `
+	Name string ` + "`" + `json:"name"` + "`" + `
 }
+
+// Times contains schema and data times, used to get StartTimes for both
 type Times struct {
-	Data   []string
-	Schema []string
+	Data   []string ` + "`" + `json:"data-times"` + "`" + `
+	Schema []string ` + "`" + `json:"schema"` + "`" + `
 }
+
+// CreationStartTime contains start and creation time for a schema or data snapshot
 type CreationStartTime struct {
-	CreationTime string
-	StartTime    string
+	CreationTime string ` + "`" + `json:"creation-time"` + "`" + `
+	StartTime    string ` + "`" + `json:"start-time"` + "`" + `
 }
+
+// CreationTimes contains schema and data times maps, used to StartTime to CreationTims
 type CreationTimes struct {
-	Data   map[string]CreationStartTime
-	Schema map[string]CreationStartTime
+	Data   map[string]CreationStartTime ` + "`" + `json:"data-time-map"` + "`" + `
+	Schema map[string]CreationStartTime ` + "`" + `json:"schema"` + "`" + `
 }
+
+// DataSetPayload is JSON payload on REST API request to create new data set
 type DataSetPayload struct {
-	Name         string
-	StartTimeStr string
-	JSONSchema   interface{}
+	Name         string      ` + "`" + `json:"name"` + "`" + `
+	StartTimeStr string      ` + "`" + `json:"start-time"` + "`" + `
+	JSONSchema   interface{} ` + "`" + `json:"schema"` + "`" + `
 }
+
+// NamePayload is JSON payload on REST API request to update data set name
 type NamePayload struct {
-	Name string
+	Name string ` + "`" + `json:"name"` + "`" + `
 }
+
+// DataPayload is JSON payload on REST API request to update data
 type DataPayload struct {
-	Data interface{}
+	Data interface{} ` + "`" + `json:"data"` + "`" + `
 }
+
+// SchemaPayload is JSON payload on REST API request to update schema
 type SchemaPayload struct {
-	Schema interface{}
+	Schema interface{} ` + "`" + `json:"schema"` + "`" + `
 }
+
+// UpdateEvent holds all information necessary to post to subscribes
 type UpdateEvent struct {
-	Key       string
-	StartTime string
-	Data      interface{}
-	Schema    interface{}
-	Deleted   bool
+	Key       string      ` + "`" + `json:"key"` + "`" + `
+	StartTime string      ` + "`" + `json:"start-time"` + "`" + `
+	Data      interface{} ` + "`" + `json:"data"` + "`" + `
+	Schema    interface{} ` + "`" + `json:"schema"` + "`" + `
+	Deleted   bool        ` + "`" + `json:"deleted"` + "`" + `
 }
 `
 
 func TestEnd2End(tt *testing.T) {
 	assert := assert.New(tt)
-
 	data, err := ioutil.ReadFile("example/example.pb")
 	assert.NoError(err)
 	module := &pb.Module{}

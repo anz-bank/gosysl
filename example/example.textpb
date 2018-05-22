@@ -13,13 +13,13 @@ apps {
     attrs {
       key: "interface_doc"
       value {
-        s: "Storer is cool"
+        s: "Storer abstracts all required RefData persistence and retrieval"
       }
     }
     attrs {
-      key: "json_map_fields"
+      key: "json_property_separator"
       value {
-        s: "dashes"
+        s: "-"
       }
     }
     endpoints {
@@ -1303,6 +1303,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "CreationStartTime contains start and creation time for a schema or data snapshot"
+          }
+        }
       }
     }
     types {
@@ -1312,6 +1318,12 @@ apps {
           attr_defs {
             key: "Data"
             value {
+              attrs {
+                key: "json"
+                value {
+                  s: "data-time-map"
+                }
+              }
               type_ref {
                 context {
                   appname {
@@ -1350,6 +1362,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "CreationTimes contains schema and data times maps, used to StartTime to CreationTims"
           }
         }
       }
@@ -1398,6 +1416,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "Data holds JSON data valid from StartTime created at CreationTime"
+          }
+        }
       }
     }
     types {
@@ -1414,6 +1438,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "DataPayload is JSON payload on REST API request to update data"
           }
         }
       }
@@ -1468,6 +1498,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "DataSetPayload is JSON payload on REST API request to create new data set"
+          }
+        }
       }
     }
     types {
@@ -1484,6 +1520,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Key is JSON result type for createDataSet in REST API"
           }
         }
       }
@@ -1515,6 +1557,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "KeyName is JSON result type for get and put dataDetNamre in REST API"
+          }
+        }
       }
     }
     types {
@@ -1537,6 +1585,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "Keys is JSON result type for getKeys in REST API"
+          }
+        }
       }
     }
     types {
@@ -1553,6 +1607,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "NamePayload is JSON payload on REST API request to update data set name"
           }
         }
       }
@@ -1629,6 +1689,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "Restriction contains scope access restriction and frozen times for schema and data."
+          }
+        }
       }
     }
     types {
@@ -1699,6 +1765,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "SchemaPayload is JSON payload on REST API request to update schema"
+          }
+        }
       }
     }
     types {
@@ -1734,6 +1806,12 @@ apps {
             }
           }
         }
+        attrs {
+          key: "doc"
+          value {
+            s: "Subscription holds external endpoint values for change notification"
+          }
+        }
       }
     }
     types {
@@ -1746,6 +1824,12 @@ apps {
               list {
                 type {
                   primitive: STRING
+                  attrs {
+                    key: "json"
+                    value {
+                      s: "data-times"
+                    }
+                  }
                   source_context {
                     start {
                       line: 89
@@ -1769,6 +1853,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Times contains schema and data times, used to get StartTimes for both"
           }
         }
       }
@@ -1831,6 +1921,12 @@ apps {
                 }
               }
             }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "UpdateEvent holds all information necessary to post to subscribes"
           }
         }
       }

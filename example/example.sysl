@@ -1,4 +1,4 @@
-RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is cool"]:
+RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer abstracts all required RefData persistence and retrieval"]:
     /api [middleware="AuthorizeRoot"]:
         GET [method_name="GetKeys", method_doc="DataSet"]:
             return Keys
@@ -54,7 +54,7 @@ RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is 
             POST(s <: Subscription) [method_name="DeleteSubscription"]:
                 return
 
-    !type Data:
+    !type Data [doc="Data holds JSON data valid from StartTime created at CreationTime"]:
         StartTime    <: string
         JSONData     <: string [json="data"]
         CreationTime <: string
@@ -64,54 +64,54 @@ RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is 
         JSONSchema   <: string [json="schema"]
         CreationTime <: string
 
-    !type Subscription:
+    !type Subscription [doc= "Subscription holds external endpoint values for change notification"]:
         URL          <: string [json="url"]
         SecreteToken <: string
 
-    !type Restriction:
+    !type Restriction [doc= "Restriction contains scope access restriction and frozen times for schema and data."]:
         SchemaFrozenUntil <: string
         DataFrozenUntil   <: string
         ReadScopes(0..)   <: string
         ReadWriteScopes(0..)   <: string
         AdminScopes(0..)       <: string
 
-    !type Keys:
+    !type Keys [doc= "Keys is JSON result type for getKeys in REST API"]:
         Keys(0..) <: string
 
-    !type Key:
+    !type Key [doc= "Key is JSON result type for createDataSet in REST API"]:
         Key <: string
 
-    !type KeyName:
+    !type KeyName [doc= "KeyName is JSON result type for get and put dataDetNamre in REST API"]:
         Key  <: string
         Name <: string
 
-    !type Times:
-        Data(0..)   <: string
+    !type Times [doc= "Times contains schema and data times, used to get StartTimes for both"]:
+        Data(0..)   <: string [json="data-times"]
         Schema(0..) <: string
 
-    !type CreationStartTime:
+    !type CreationStartTime [doc= "CreationStartTime contains start and creation time for a schema or data snapshot"]:
         CreationTime <: string
         StartTime <: string
 
-    !type CreationTimes:
-        Data   <: map of string:CreationStartTime
+    !type CreationTimes [doc= "CreationTimes contains schema and data times maps, used to StartTime to CreationTims"]:
+        Data   <: map of string:CreationStartTime  [json="data-time-map"]
         Schema <: map of string:CreationStartTime
 
-    !type DataSetPayload:
+    !type DataSetPayload [doc= "DataSetPayload is JSON payload on REST API request to create new data set"]:
         Name         <: string
         StartTimeStr <: string [json="start-time"]
         JSONSchema   <: any [json="schema"]
 
-    !type NamePayload:
+    !type NamePayload [doc= "NamePayload is JSON payload on REST API request to update data set name"]:
         Name <: string
 
-    !type DataPayload:
+    !type DataPayload [doc= "DataPayload is JSON payload on REST API request to update data"]:
         Data <: any
 
-    !type SchemaPayload:
+    !type SchemaPayload [doc= "SchemaPayload is JSON payload on REST API request to update schema"]:
         Schema <: any
 
-    !type UpdateEvent:
+    !type UpdateEvent [doc= "UpdateEvent holds all information necessary to post to subscribes"]:
         Key <: string
         StartTime <: string
         Data <: any
