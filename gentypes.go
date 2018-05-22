@@ -10,7 +10,7 @@ import (
 	"github.com/anz-bank/gosysl/pb"
 )
 
-// GenPrimitiveType return golang type string for sysl primitive data type
+// GenPrimitiveType return Golang type string for Sysl primitive data type
 func GenPrimitiveType(tp pb.Type_Primitive) (string, error) {
 	switch tp {
 	case pb.Type_BOOL:
@@ -34,10 +34,9 @@ func GenPrimitiveType(tp pb.Type_Primitive) (string, error) {
 	return "", fmt.Errorf("unsupported type primitive %s", tp.String())
 }
 
-// GenSimpleType returns golang type string for non-composite types (no lists and sets)
+// GenSimpleType returns Golang type string for non-composite types (no lists and sets)
 func GenSimpleType(t *pb.Type) (string, error) {
-	pType := t.GetPrimitive()
-	if pType != pb.Type_NO_Primitive {
+	if pType := t.GetPrimitive(); pType != pb.Type_NO_Primitive {
 		return GenPrimitiveType(pType)
 	}
 	if t.GetTypeRef() != nil {
@@ -61,7 +60,7 @@ func GenSimpleType(t *pb.Type) (string, error) {
 
 }
 
-// GetLine returns the line for a given sysl type form its SourceContext
+// GetLine returns the line for a given Sysl type from its SourceContext
 func GetLine(t *pb.Type) (int32, error) {
 	if t.GetPrimitive() != pb.Type_NO_Primitive || t.GetTypeRef() != nil {
 		return t.GetSourceContext().Start.Line, nil
@@ -74,11 +73,11 @@ func GetLine(t *pb.Type) (int32, error) {
 			return GetLine(t2)
 		}
 	}
-	return 0, fmt.Errorf("unknwon type %v for getting line", t)
+	return 0, fmt.Errorf("unknown type %v for getting line", t)
 }
 
-//NamesSortedBySourceContext sorts the keys of the imput types according to occurance
-// in sysl definiton file, derived from SourceContext
+//NamesSortedBySourceContext sorts the keys of the input types according to occurrence
+// in Sysl definition file, derived from SourceContext
 func NamesSortedBySourceContext(types map[string]*pb.Type) ([]string, error) {
 	type lineName struct {
 		name string
@@ -105,7 +104,7 @@ func NamesSortedBySourceContext(types map[string]*pb.Type) ([]string, error) {
 	return result, nil
 }
 
-//GenStruct creates a golang struct type defintion from a sysl Tuple type definiotn
+//GenStruct creates a Golang `struct` type definition from a Sysl Tuple type definition
 func GenStruct(name string, t *pb.Type) (string, error) {
 	if t.GetTuple() == nil {
 		return "", fmt.Errorf("top level type has to be Tuple")
@@ -148,7 +147,7 @@ func GenStruct(name string, t *pb.Type) (string, error) {
 	return string(b), err
 }
 
-// GenTypes creates all types defintions in SourceContext order for given Sysl type defintion
+// GenTypes creates all types definition in SourceContext order for given Sysl type definition
 func GenTypes(types map[string]*pb.Type) (string, error) {
 	names, err := NamesSortedBySourceContext(types)
 	if err != nil {

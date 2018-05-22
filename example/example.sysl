@@ -55,55 +55,55 @@ RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is 
                 return
 
     !type Data:
-        StartTime    <: STRING
-        JSONData     <: STRING [json="data"]
-        CreationTime <: STRING
+        StartTime    <: string
+        JSONData     <: string [json="data"]
+        CreationTime <: string
 
     !type Schema [doc="Schema holds JSON Schema to validate Data against, a name for key creation."]:
-        StartTime    <: STRING
-        JSONSchema   <: STRING [json="schema"]
-        CreationTime <: STRING
+        StartTime    <: string
+        JSONSchema   <: string [json="schema"]
+        CreationTime <: string
 
     !type Subscription:
-        URL          <: STRING [json="url"]
-        SecreteToken <: STRING
+        URL          <: string [json="url"]
+        SecreteToken <: string
 
     !type Restriction:
-        SchemaFrozenUntil <: STRING
-        DataFrozenUntil   <: STRING
-        ReadScopes(0..)   <: STRING
-        ReadWriteScopes(0..)   <: STRING
-        AdminScopes(0..)       <: STRING
+        SchemaFrozenUntil <: string
+        DataFrozenUntil   <: string
+        ReadScopes(0..)   <: string
+        ReadWriteScopes(0..)   <: string
+        AdminScopes(0..)       <: string
 
     !type Keys:
-        Keys(0..) <: STRING
+        Keys(0..) <: string
 
     !type Key:
-        Key <: STRING
+        Key <: string
 
     !type KeyName:
-        Key  <: STRING
-        Name <: STRING
+        Key  <: string
+        Name <: string
 
     !type Times:
-        Data(0..)   <: STRING
-        Schema(0..) <: STRING
+        Data(0..)   <: string
+        Schema(0..) <: string
 
     !type CreationStartTime:
-        CreationTime <: STRING
-        StartTime <: STRING
+        CreationTime <: string
+        StartTime <: string
 
     !type CreationTimes:
         Data   <: map of string:CreationStartTime
         Schema <: map of string:CreationStartTime
 
     !type DataSetPayload:
-        Name         <: STRING
-        StartTimeStr <: STRING [json="start-time"]
-        JSONSchema   <: ANY [json="schema"]
+        Name         <: string
+        StartTimeStr <: string [json="start-time"]
+        JSONSchema   <: any [json="schema"]
 
     !type NamePayload:
-        Name <: STRING
+        Name <: string
 
     !type DataPayload:
         Data <: any
@@ -112,9 +112,9 @@ RestApi [json_map_fields="dashes", interface="Storer", interface_doc="Storer is 
         Schema <: any
 
     !type UpdateEvent:
-        Key <: STRING
-        StartTime <: STRING
-        Data <: ANY
-        Schema <: ANY
+        Key <: string
+        StartTime <: string
+        Data <: any
+        Schema <: any
         Deleted <: bool
 
