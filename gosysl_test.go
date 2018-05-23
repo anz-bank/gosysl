@@ -11,6 +11,39 @@ import (
 
 var expectedRest = `package mypkg
 
+// Storer abstracts all required RefData persistence and retrieval
+type Storer interface {
+
+	// DataSet
+	GetKeys() (Keys, error)
+	CreateDataSet(ds DataSetPayload) (Key, error)
+	GetDataSetName(key string, queryTime string) (KeyName, error)
+	PutDataSetName(key string, np NamePayload) (KeyName, error)
+
+	// Data
+	GetData(key string, queryTime string) (Data, error)
+	PutData(key string, dp DataPayload) (Data, error)
+	GetDataWithStart(startTime string, key string) (Data, error)
+	PutDataWithStart(startTime string, key string, dp DataPayload) (Data, error)
+	DeleteData(startTime string, key string) error
+
+	// Schema
+	GetSchema(key string, queryTime string) (Schema, error)
+	PutSchema(key string, sp SchemaPayload) (Schema, error)
+	GetSchemaWithStart(startTime string, key string) (Schema, error)
+	PutSchemaWithStart(startTime string, key string, sp SchemaPayload) (Schema, error)
+	DeleteSchema(startTime string, key string) error
+
+	// Admin
+	DeleteDataSet(key string) error
+	GetStartTimes(key string) (Times, error)
+	GetCreationTimes(key string) (CreationTimes, error)
+	GetRestriction(key string) (Restriction, error)
+	PutRestriction(key string, r Restriction) (Restriction, error)
+	PutSubscription(key string, s Subscription) (Subscription, error)
+	DeleteSubscription(key string, s Subscription) error
+}
+
 // Data holds JSON data valid from StartTime created at CreationTime
 type Data struct {
 	StartTime    string ` + "`json:\"start-time\"`" + `
@@ -115,6 +148,7 @@ func TestEnd2End(tt *testing.T) {
 	assert.NoError(err)
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
+	//fmt.Println(result.Interface)
 	assert.Equal(expectedRest, result.Interface)
 
 	// failing gofmt

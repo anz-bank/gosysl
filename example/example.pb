@@ -1,5 +1,5 @@
-æ;
-RestApiÚ;
+«<
+RestApiŸ<
 	
 RestApi"
 	interface"Storer"R
@@ -14,8 +14,8 @@
 
 middleware"AuthorizeDataSet:B
 DataBH/api/{key}/{startTime}
-	startTime	š 
-key	š *¡
+	startTime	š 
+key	š *¡
 	POST /api“
 	POST /api"
 method_name"CreateDataSet"
@@ -39,8 +39,8 @@ DeleteData"
 middleware"AuthorizeDataSet:
 
 returnBH/api/{key}/{startTime}
-	startTime	š 
-key	š *÷
+	startTime	š 
+key	š *÷
 GET /api/{key}/nameß
 GET /api/{key}/name"
 method_name"GetDataSetName"
@@ -50,11 +50,11 @@ middleware"AuthorizeDataSet:
 
 middleware"AuthorizeDataSet:B	
 KeyNameB`/api/{key}/name
-key	š  7
+key	š 7
 time-J$
 
 	
-RestApi{queryTime<:string}š  *‚
+RestApi{queryTime<:string}š *‚
 POST /api/admin/{key}/subscribeÞ
 POST /api/admin/{key}/subscribe" 
 method_name"PutSubscription"
@@ -78,8 +78,7 @@ middleware"AuthorizeDataSet:B
 middleware"AuthorizeDataSet:B
 DataB"
 /api/{key}
-key	š
- J
+key	š J
 dpJ
 
 DataPayload*†
@@ -105,41 +104,45 @@ middleware"AuthorizeDataSet:B
 
 middleware"AuthorizeDataSet:B
 DataBH/api/{key}/{startTime}
-	startTime	š 
-key	š J
+	startTime	š 
+key	š J
 dpJ
 
-DataPayload*Þ
-GET /api/{key}Ë
+DataPayload*ô
+GET /api/{key}á
 GET /api/{key}"
 method_name	"GetData"
 patterns
 :
 "rest" 
 
-middleware"AuthorizeDataSet:B
+middleware"AuthorizeDataSet"
+
+method_doc"Data:B
 DataB[
 /api/{key}
-key	š 7
+key	š 7
 time-J$
 
 	
-RestApi{queryTime<:string}š *÷
-GET /api/{key}/schemaÝ
+RestApi{queryTime<:string}š *
+GET /api/{key}/schemaõ
 GET /api/{key}/schema"
 method_name"	GetSchema"
 patterns
 :
 "rest" 
 
-middleware"AuthorizeDataSet:
+middleware"AuthorizeDataSet"
+
+method_doc"Schema:
 B
 SchemaBb/api/{key}/schema
-key	š 7
+key	š 7
 time-J$
 
 	
-RestApi{queryTime<:string}š *ö
+RestApi{queryTime<:string}š *ö
 #GET /api/admin/{key}/creation-timesÎ
 #GET /api/admin/{key}/creation-times"!
 method_name"GetCreationTimes"
@@ -160,25 +163,24 @@ middleware"AuthorizeDataSet:B
 middleware"AuthorizeDataSet:
 B
 SchemaB)/api/{key}/schema
-key	š J
+key	š J
 spJ
 
-SchemaPayload*¢
-!PUT /api/{key}/schema/{startTime}ü
-!PUT /api/{key}/schema/{startTime}"#
-method_name"PutSchemaWithStart"
+SchemaPayload*Ù
+PUT /api/{key}/nameÁ
+PUT /api/{key}/name"
+method_name"PutDataSetName"
 patterns
 :
 "rest" 
 
-middleware"AuthorizeDataSet:
-B
-SchemaBO/api/{key}/schema/{startTime}
-	startTime	š 
-key	š J
-spJ
-
-SchemaPayload*…
+middleware"AuthorizeDataSet:B	
+KeyNameB'/api/{key}/name
+key	š
+ J
+npJ
+
+NamePayload*…
 !GET /api/{key}/schema/{startTime}ß
 !GET /api/{key}/schema/{startTime}"#
 method_name"GetSchemaWithStart"
@@ -189,8 +191,8 @@ B
 middleware"AuthorizeDataSet:
 B
 SchemaBO/api/{key}/schema/{startTime}
-	startTime	š 
-key	š *•
+	startTime	š 
+key	š *•
 GET /apiˆ
 GET /api"
 method_name	"GetKeys"
@@ -211,20 +213,22 @@ method_doc	"DataSet:B
 
 middleware"AuthorizeDataSet:B
 RestrictionB5/api/admin/{key}/restrictions
-key	š. *Ù
-PUT /api/{key}/nameÁ
-PUT /api/{key}/name"
-method_name"PutDataSetName"
+key	š. *¢
+!PUT /api/{key}/schema/{startTime}ü
+!PUT /api/{key}/schema/{startTime}"#
+method_name"PutSchemaWithStart"
 patterns
 :
 "rest" 
 
-middleware"AuthorizeDataSet:B	
-KeyNameB'/api/{key}/name
-key	š" J
-npJ
-
-NamePayload*…
+middleware"AuthorizeDataSet:
+B
+SchemaBO/api/{key}/schema/{startTime}
+	startTime	š  
+key	š  J
+spJ
+
+SchemaPayload*…
 !POST /api/admin/{key}/unsubscribeß
 !POST /api/admin/{key}/unsubscribe"#
 method_name"DeleteSubscription"
@@ -238,15 +242,17 @@ middleware"AuthorizeDataSet:
 key	š6 J
 sJ
 
-Subscription*Å
-DELETE /api/admin/{key}©
+Subscription*Ü
+DELETE /api/admin/{key}À
 DELETE /api/admin/{key}"
 method_name"DeleteDataSet"
 patterns
 :
 "rest" 
 
-middleware"AuthorizeDataSet:
+middleware"AuthorizeDataSet"
+
+method_doc"Admin:
 
 returnB(/api/admin/{key}
 key	š% *…
@@ -260,8 +266,8 @@ $DELETE /api/{key}/schema/{startTime}"
 middleware"AuthorizeDataSet:
 
 returnBO/api/{key}/schema/{startTime}
-	startTime	š 
-key	š *â
+	startTime	š" 
+key	š" *â
  GET /api/admin/{key}/start-times½
  GET /api/admin/{key}/start-times"
 method_name"GetStartTimes"
