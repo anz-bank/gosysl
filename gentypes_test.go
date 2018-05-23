@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/anz-bank/gosysl/pb"
-	"github.com/stretchr/testify/assert"
+	testifyAssert "github.com/stretchr/testify/assert"
 )
 
 var primitiveTests = []struct {
@@ -30,20 +30,20 @@ var primitiveErrTests = []pb.Type_Primitive{
 }
 
 func TestGenPrimitiveType(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 	for _, t := range primitiveTests {
-		str, err := GenPrimitiveType(t.input)
+		str, err := GenPrimitiveType(&t.input)
 		assert.NoError(err)
 		assert.Equal(t.expected, str)
 	}
 	for _, tp := range primitiveErrTests {
-		_, err := GenPrimitiveType(tp)
+		_, err := GenPrimitiveType(&tp)
 		assert.Error(err)
 	}
 }
 
 func TestGenSimpleType(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 	for _, t := range primitiveTests {
 		primitive := &pb.Type_Primitive_{Primitive: t.input}
 		pt := &pb.Type{Type: primitive}
@@ -97,7 +97,7 @@ func TestGenSimpleType(tt *testing.T) {
 }
 
 func TestSplitUppercase(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 
 	assert.Equal([]string{"a"}, SplitUppercase("a"))
 	assert.Equal([]string{"abc"}, SplitUppercase("abc"))
@@ -107,7 +107,7 @@ func TestSplitUppercase(tt *testing.T) {
 }
 
 func TestGenStruct(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 
 	attrDefs := map[string]*pb.Type{}
 	typeTuple := &pb.Type_Tuple_{Tuple: &pb.Type_Tuple{AttrDefs: attrDefs}}
@@ -120,7 +120,10 @@ func TestGenStruct(tt *testing.T) {
 
 	str, err := GenStruct("DataPayload", ttype, "")
 	assert.NoError(err)
-	expected, _ := format.Source([]byte("type DataPayload struct {\nData interface{} `json:\"Data\"`\n}\n"))
+	expectedSrc := `type DataPayload struct {
+			Data interface{} ` + "`" + `json:"Data"` + "`" + `
+		}` + "\n"
+	expected, _ := format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
 
 	attrDefs["LastName"] = &pb.Type{
@@ -129,7 +132,7 @@ func TestGenStruct(tt *testing.T) {
 	}
 	str, err = GenStruct("DataPayload", ttype, "-")
 	assert.NoError(err)
-	expectedSrc := `type DataPayload struct {
+	expectedSrc = `type DataPayload struct {
 			Data interface{} ` + "`json:\"data\"`" + `
 			LastName string  ` + "`json:\"last-name\"`" + `
 		}` + "\n"
@@ -212,7 +215,7 @@ func TestGenStruct(tt *testing.T) {
 }
 
 func TestGentypesCornerCases(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 
 	module := &pb.Module{}
 	_, err := Generate(module, "")
@@ -221,12 +224,12 @@ func TestGentypesCornerCases(tt *testing.T) {
 	_, err = GetLine(&pb.Type{})
 	assert.Error(err)
 
-	types := map[string]*pb.Type{"x": &pb.Type{}}
+	types := map[string]*pb.Type{"x": {}}
 	_, err = NamesSortedBySourceContext(types)
 	assert.Error(err)
 	_, err = GenTypes(types, "")
 	assert.Error(err)
-	module.Apps = map[string]*pb.Application{"x": &pb.Application{Types: types}}
+	module.Apps = map[string]*pb.Application{"x": {Types: types}}
 	_, err = Generate(module, "")
 	assert.Error(err)
 

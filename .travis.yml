@@ -1,12 +1,12 @@
 language: go
 
 install:
-  - go get -u github.com/golang/lint/golint
+  - go get -d -t
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
 
 script:
-  - go get -d -t
-  - go vet
-  - golint -set_exit_status
+  - gometalinter --enable-all .
   - go test -race -coverprofile=coverage.txt -covermode=atomic
 
 after_success:

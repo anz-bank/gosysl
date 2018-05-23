@@ -6,7 +6,7 @@ import (
 
 	"github.com/anz-bank/gosysl/pb"
 	"github.com/golang/protobuf/proto"
-	"github.com/stretchr/testify/assert"
+	testifyAssert "github.com/stretchr/testify/assert"
 )
 
 var expectedRest = `package mypkg
@@ -107,7 +107,7 @@ type UpdateEvent struct {
 `
 
 func TestEnd2End(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 	data, err := ioutil.ReadFile("example/example.pb")
 	assert.NoError(err)
 	module := &pb.Module{}
@@ -116,10 +116,14 @@ func TestEnd2End(tt *testing.T) {
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
 	assert.Equal(expectedRest, result.Interface)
+
+	// failing gofmt
+	_, err = Generate(module, "BAD PACKAGE NAME")
+	assert.Error(err)
 }
 
 func TestGetPackage(tt *testing.T) {
-	assert := assert.New(tt)
+	assert := testifyAssert.New(tt)
 
 	assert.Equal("x", GetPackage("x"))
 	assert.Equal("y", GetPackage("x/y"))

@@ -12,8 +12,8 @@ import (
 )
 
 // GenPrimitiveType return Golang type string for Sysl primitive data type
-func GenPrimitiveType(tp pb.Type_Primitive) (string, error) {
-	switch tp {
+func GenPrimitiveType(tp *pb.Type_Primitive) (string, error) {
+	switch *tp {
 	case pb.Type_BOOL:
 		return "bool", nil
 	case pb.Type_ANY:
@@ -38,7 +38,7 @@ func GenPrimitiveType(tp pb.Type_Primitive) (string, error) {
 // GenSimpleType returns Golang type string for non-composite types (no lists and sets)
 func GenSimpleType(t *pb.Type) (string, error) {
 	if pType := t.GetPrimitive(); pType != pb.Type_NO_Primitive {
-		return GenPrimitiveType(pType)
+		return GenPrimitiveType(&pType)
 	}
 	if t.GetTypeRef() != nil {
 		path := t.GetTypeRef().GetRef().GetPath()
@@ -53,7 +53,8 @@ func GenSimpleType(t *pb.Type) (string, error) {
 		str = strings.Trim(str, " ")
 		m := strings.Split(str, ":")
 		if len(m) != 2 {
-			return "", fmt.Errorf("bad map definition '%s', should be map of KeyType:ValueType", str)
+			shouldStr := `should be map of KeyType:ValueType`
+			return "", fmt.Errorf("bad map definition '%s' (%s)", str, shouldStr)
 		}
 		return fmt.Sprintf("map[%s]%s", m[0], m[1]), nil
 	}
@@ -105,9 +106,11 @@ func NamesSortedBySourceContext(types map[string]*pb.Type) ([]string, error) {
 	return result, nil
 }
 
+// SplitUppercase splits into fields at all upper case letters and converts
+// fields to lower case
 func SplitUppercase(str string) []string {
 	result := []string{}
-	i := 0
+	var i int
 	for s := str; s != ""; s = s[i:] {
 		i = strings.IndexFunc(s[1:], unicode.IsUpper) + 1
 		if i == 0 {
@@ -118,7 +121,8 @@ func SplitUppercase(str string) []string {
 	return result
 }
 
-func GetJsonProperty(name string, t *pb.Type, sep string) string {
+// GetJSONProperty extracts JSON property name from attribute and defaults to type name
+func GetJSONProperty(name string, t *pb.Type, sep string) string {
 	if attrOverride, ok := t.Attrs["json"]; ok {
 		return attrOverride.GetS()
 	}
@@ -126,6 +130,35 @@ func GetJsonProperty(name string, t *pb.Type, sep string) string {
 		return name
 	}
 	return strings.Join(SplitUppercase(name), sep)
+}
+
+// GenStructField creates a single line inside a struct definition
+func GenStructField(fieldName string, fieldType *pb.Type, sep string) (string, error) {
+	var typeStr string
+	var err error
+	if fieldType.GetPrimitive() != pb.Type_NO_Primitive || fieldType.GetTypeRef() != nil {
+		// Primitive type, reference or map
+		if typeStr, err = GenSimpleType(fieldType); err == nil {
+			typeStr = fmt.Sprintf("%s %s ", fieldName, typeStr)
+		}
+	} else if fieldType.GetList() != nil {
+		// List
+		fieldType = fieldType.GetList().GetType()
+		if typeStr, err = GenSimpleType(fieldType); err == nil {
+			typeStr = fmt.Sprintf("%s []%s ", fieldName, typeStr)
+		}
+	} else if fieldType.GetSet() != nil {
+		// Set
+		fieldType = fieldType.GetSet()
+		if typeStr, err = GenSimpleType(fieldType); err == nil {
+			typeStr = fmt.Sprintf("%s map[%s]interface{} ", fieldName, typeStr)
+		}
+	}
+	if err != nil {
+		return "", err
+	}
+	jsonProp := GetJSONProperty(fieldName, fieldType, sep)
+	return fmt.Sprintf("%s `json:\"%s\"`\n", typeStr, jsonProp), nil
 }
 
 //GenStruct creates a Golang `struct` type definition from a Sysl Tuple type definition
@@ -146,40 +179,20 @@ func GenStruct(name string, t *pb.Type, jsonSep string) (string, error) {
 	}
 
 	for _, fieldName := range names {
-		//TODO add JSON fields, docs
-		fieldType := attrDefs[fieldName]
-		var err error
-		var typeStr string
-		if fieldType.GetPrimitive() != pb.Type_NO_Primitive || fieldType.GetTypeRef() != nil {
-			// Primitive type, reference or map
-			if typeStr, err = GenSimpleType(fieldType); err == nil {
-				buffer.WriteString(fmt.Sprintf("%s %s ", fieldName, typeStr))
-			}
-		} else if fieldType.GetList() != nil {
-			// List
-			fieldType = fieldType.GetList().GetType()
-			if typeStr, err = GenSimpleType(fieldType); err == nil {
-				buffer.WriteString(fmt.Sprintf("%s []%s ", fieldName, typeStr))
-			}
-		} else if fieldType.GetSet() != nil {
-			// Set
-			fieldType = fieldType.GetSet()
-			if typeStr, err = GenSimpleType(fieldType); err == nil {
-				buffer.WriteString(fmt.Sprintf("%s map[%s]interface{} ", fieldName, typeStr))
-			}
-		}
+		var structField string
+		structField, err = GenStructField(fieldName, attrDefs[fieldName], jsonSep)
 		if err != nil {
 			return "", err
 		}
-		jsonProp := GetJsonProperty(fieldName, fieldType, jsonSep)
-		buffer.WriteString(fmt.Sprintf("`json:\"%s\"`\n", jsonProp))
+		buffer.WriteString(structField)
 	}
 	buffer.WriteString("}\n")
 	b, err := format.Source(buffer.Bytes())
 	return string(b), err
 }
 
-// GenTypes creates all types definition in SourceContext order for given Sysl type definition
+// GenTypes creates all types definition in SourceContext order for given Sysl
+// type definition
 func GenTypes(types map[string]*pb.Type, jsonSep string) (string, error) {
 	names, err := NamesSortedBySourceContext(types)
 	if err != nil {
