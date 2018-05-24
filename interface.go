@@ -36,15 +36,12 @@ func genMethodName(ep *pb.Endpoint) string {
 	if n, ok := ep.Attrs["method_name"]; ok {
 		return n.GetS()
 	}
-	name := strings.Replace(ep.Name, " ", "", -1)
-	name = strings.Replace(name, "{", "", -1)
-	name = strings.Replace(name, "}", "", -1)
 
-	name = strings.Replace(name, "-", "/", -1)
-	name = strings.Replace(name, "_", "/", -1)
-	name = strings.Replace(name, ".", "/", -1)
-	name = strings.Replace(name, ",", "/", -1)
-	name = strings.Replace(name, "#", "/", -1)
+	re := regexp.MustCompile(`[{}\s]`)
+	name := re.ReplaceAllLiteralString(ep.Name, "")
+
+	re = regexp.MustCompile(`[._,#-]`)
+	name = re.ReplaceAllLiteralString(name, "/")
 
 	fields := strings.Split(name, "/")
 	for i, field := range fields {
