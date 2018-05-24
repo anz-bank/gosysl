@@ -1,0 +1,1935 @@
+apps {
+  key: "RestApi"
+  value {
+    name {
+      part: "RestApi"
+    }
+    attrs {
+      key: "interface"
+      value {
+        s: "Storer"
+      }
+    }
+    attrs {
+      key: "interface_doc"
+      value {
+        s: "Storer abstracts all required RefData persistence and retrieval"
+      }
+    }
+    attrs {
+      key: "json_property_separator"
+      value {
+        s: "-"
+      }
+    }
+    endpoints {
+      key: "DELETE /api/admin/{key}"
+      value {
+        name: "DELETE /api/admin/{key}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteDataSet"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          action {
+            action: "return"
+          }
+        }
+        rest_params {
+          method: DELETE
+          path: "/api/admin/{key}"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 37
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "DELETE /api/{key}/schema/{startTime}"
+      value {
+        name: "DELETE /api/{key}/schema/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteSchema"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          action {
+            action: "return"
+          }
+        }
+        rest_params {
+          method: DELETE
+          path: "/api/{key}/schema/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 29
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 29
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "DELETE /api/{key}/{startTime}"
+      value {
+        name: "DELETE /api/{key}/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          action {
+            action: "return"
+          }
+        }
+        rest_params {
+          method: DELETE
+          path: "/api/{key}/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 17
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 17
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api"
+      value {
+        name: "GET /api"
+        attrs {
+          key: "method_doc"
+          value {
+            s: "DataSet"
+          }
+        }
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetKeys"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeRoot"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Keys"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api"
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/creation-times"
+      value {
+        name: "GET /api/admin/{key}/creation-times"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetCreationTimes"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "CreationTimes"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/creation-times"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 43
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/restrictions"
+      value {
+        name: "GET /api/admin/{key}/restrictions"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetRestriction"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Restriction"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/restrictions"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 46
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/admin/{key}/start-times"
+      value {
+        name: "GET /api/admin/{key}/start-times"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetStartTimes"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Times"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/admin/{key}/start-times"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 40
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}"
+      value {
+        name: "GET /api/{key}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Data"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/{key}"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 8
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "time"
+            type {
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
+                  }
+                }
+                ref {
+                  path: "{queryTime<:string}"
+                }
+              }
+              source_context {
+                start {
+                  line: 8
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}/name"
+      value {
+        name: "GET /api/{key}/name"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetDataSetName"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "KeyName"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/{key}/name"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 32
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "time"
+            type {
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
+                  }
+                }
+                ref {
+                  path: "{queryTime<:string}"
+                }
+              }
+              source_context {
+                start {
+                  line: 32
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}/schema"
+      value {
+        name: "GET /api/{key}/schema"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetSchema"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Schema"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/{key}/schema"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 20
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "time"
+            type {
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
+                  }
+                }
+                ref {
+                  path: "{queryTime<:string}"
+                }
+              }
+              source_context {
+                start {
+                  line: 20
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}/schema/{startTime}"
+      value {
+        name: "GET /api/{key}/schema/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetSchemaWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Schema"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/{key}/schema/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 25
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 25
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "GET /api/{key}/{startTime}"
+      value {
+        name: "GET /api/{key}/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "GetDataWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Data"
+          }
+        }
+        rest_params {
+          method: GET
+          path: "/api/{key}/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 13
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 13
+                }
+              }
+            }
+            loc: true
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "POST /api"
+      value {
+        name: "POST /api"
+        attrs {
+          key: "method_name"
+          value {
+            s: "CreateDataSet"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeRoot"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Key"
+          }
+        }
+        rest_params {
+          method: POST
+          path: "/api"
+        }
+        param {
+          name: "ds"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataSetPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "POST /api/admin/{key}/subscribe"
+      value {
+        name: "POST /api/admin/{key}/subscribe"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutSubscription"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Subscription"
+          }
+        }
+        rest_params {
+          method: POST
+          path: "/api/admin/{key}/subscribe"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 51
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "s"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Subscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "POST /api/admin/{key}/unsubscribe"
+      value {
+        name: "POST /api/admin/{key}/unsubscribe"
+        attrs {
+          key: "method_name"
+          value {
+            s: "DeleteSubscription"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          action {
+            action: "return"
+          }
+        }
+        rest_params {
+          method: POST
+          path: "/api/admin/{key}/unsubscribe"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 54
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "s"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Subscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/admin/{key}/restrictions"
+      value {
+        name: "PUT /api/admin/{key}/restrictions"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutRestriction"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Restriction"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/admin/{key}/restrictions"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 48
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "r"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "Restriction"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}"
+      value {
+        name: "PUT /api/{key}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutData"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Data"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 10
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "dp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}/name"
+      value {
+        name: "PUT /api/{key}/name"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutDataSetName"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "KeyName"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}/name"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 34
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "np"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "NamePayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}/schema"
+      value {
+        name: "PUT /api/{key}/schema"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutSchema"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Schema"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}/schema"
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 22
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "sp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "SchemaPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}/schema/{startTime}"
+      value {
+        name: "PUT /api/{key}/schema/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutSchemaWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Schema"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}/schema/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 27
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 27
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "sp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "SchemaPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    endpoints {
+      key: "PUT /api/{key}/{startTime}"
+      value {
+        name: "PUT /api/{key}/{startTime}"
+        attrs {
+          key: "method_name"
+          value {
+            s: "PutDataWithStart"
+          }
+        }
+        attrs {
+          key: "middleware"
+          value {
+            s: "AuthorizeDataSet"
+          }
+        }
+        attrs {
+          key: "patterns"
+          value {
+            a {
+              elt {
+                s: "rest"
+              }
+            }
+          }
+        }
+        stmt {
+          ret {
+            payload: "Data"
+          }
+        }
+        rest_params {
+          method: PUT
+          path: "/api/{key}/{startTime}"
+          query_param {
+            name: "startTime"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 15
+                }
+              }
+            }
+            loc: true
+          }
+          query_param {
+            name: "key"
+            type {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 15
+                }
+              }
+            }
+            loc: true
+          }
+        }
+        param {
+          name: "dp"
+          type {
+            type_ref {
+              ref {
+                appname {
+                  part: "DataPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    types {
+      key: "CreationStartTime"
+      value {
+        tuple {
+          attr_defs {
+            key: "CreationTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 93
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 94
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "CreationStartTime contains start and creation time for a schema or data snapshot"
+          }
+        }
+      }
+    }
+    types {
+      key: "CreationTimes"
+      value {
+        tuple {
+          attr_defs {
+            key: "Data"
+            value {
+              attrs {
+                key: "json"
+                value {
+                  s: "data-time-map"
+                }
+              }
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
+                  }
+                  path: "CreationTimes"
+                }
+                ref {
+                  path: "map of string:CreationStartTime"
+                }
+              }
+              source_context {
+                start {
+                  line: 97
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Schema"
+            value {
+              type_ref {
+                context {
+                  appname {
+                    part: "RestApi"
+                  }
+                  path: "CreationTimes"
+                }
+                ref {
+                  path: "map of string:CreationStartTime"
+                }
+              }
+              source_context {
+                start {
+                  line: 98
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "CreationTimes contains schema and data times maps, used to StartTime to CreationTims"
+          }
+        }
+      }
+    }
+    types {
+      key: "Data"
+      value {
+        tuple {
+          attr_defs {
+            key: "CreationTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 60
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "JSONData"
+            value {
+              primitive: STRING
+              attrs {
+                key: "json"
+                value {
+                  s: "data"
+                }
+              }
+              source_context {
+                start {
+                  line: 59
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 58
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Data holds JSON data valid from StartTime created at CreationTime"
+          }
+        }
+      }
+    }
+    types {
+      key: "DataPayload"
+      value {
+        tuple {
+          attr_defs {
+            key: "Data"
+            value {
+              primitive: ANY
+              source_context {
+                start {
+                  line: 109
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "DataPayload is JSON payload on REST API request to update data"
+          }
+        }
+      }
+    }
+    types {
+      key: "DataSetPayload"
+      value {
+        tuple {
+          attr_defs {
+            key: "JSONSchema"
+            value {
+              primitive: ANY
+              attrs {
+                key: "json"
+                value {
+                  s: "schema"
+                }
+              }
+              source_context {
+                start {
+                  line: 103
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Name"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 101
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTimeStr"
+            value {
+              primitive: STRING
+              attrs {
+                key: "json"
+                value {
+                  s: "start-time"
+                }
+              }
+              source_context {
+                start {
+                  line: 102
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "DataSetPayload is JSON payload on REST API request to create new data set"
+          }
+        }
+      }
+    }
+    types {
+      key: "Key"
+      value {
+        tuple {
+          attr_defs {
+            key: "Key"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 82
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Key is JSON result type for createDataSet in REST API"
+          }
+        }
+      }
+    }
+    types {
+      key: "KeyName"
+      value {
+        tuple {
+          attr_defs {
+            key: "Key"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 85
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Name"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 86
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "KeyName is JSON result type for get and put dataDetNamre in REST API"
+          }
+        }
+      }
+    }
+    types {
+      key: "Keys"
+      value {
+        tuple {
+          attr_defs {
+            key: "Keys"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 79
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Keys is JSON result type for getKeys in REST API"
+          }
+        }
+      }
+    }
+    types {
+      key: "NamePayload"
+      value {
+        tuple {
+          attr_defs {
+            key: "Name"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 106
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "NamePayload is JSON payload on REST API request to update data set name"
+          }
+        }
+      }
+    }
+    types {
+      key: "Restriction"
+      value {
+        tuple {
+          attr_defs {
+            key: "AdminScopes"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 76
+                    }
+                  }
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "DataFrozenUntil"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 73
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "ReadScopes"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 74
+                    }
+                  }
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "ReadWriteScopes"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 75
+                    }
+                  }
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "SchemaFrozenUntil"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 72
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Restriction contains scope access restriction and frozen times for schema and data."
+          }
+        }
+      }
+    }
+    types {
+      key: "Schema"
+      value {
+        tuple {
+          attr_defs {
+            key: "CreationTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 65
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "JSONSchema"
+            value {
+              primitive: STRING
+              attrs {
+                key: "json"
+                value {
+                  s: "schema"
+                }
+              }
+              source_context {
+                start {
+                  line: 64
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 63
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Schema holds JSON Schema to validate Data against, a name for key creation."
+          }
+        }
+      }
+    }
+    types {
+      key: "SchemaPayload"
+      value {
+        tuple {
+          attr_defs {
+            key: "Schema"
+            value {
+              primitive: ANY
+              source_context {
+                start {
+                  line: 112
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "SchemaPayload is JSON payload on REST API request to update schema"
+          }
+        }
+      }
+    }
+    types {
+      key: "Subscription"
+      value {
+        tuple {
+          attr_defs {
+            key: "SecreteToken"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 69
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "URL"
+            value {
+              primitive: STRING
+              attrs {
+                key: "json"
+                value {
+                  s: "url"
+                }
+              }
+              source_context {
+                start {
+                  line: 68
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Subscription holds external endpoint values for change notification"
+          }
+        }
+      }
+    }
+    types {
+      key: "Times"
+      value {
+        tuple {
+          attr_defs {
+            key: "Data"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  attrs {
+                    key: "json"
+                    value {
+                      s: "data-times"
+                    }
+                  }
+                  source_context {
+                    start {
+                      line: 89
+                    }
+                  }
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Schema"
+            value {
+              list {
+                type {
+                  primitive: STRING
+                  source_context {
+                    start {
+                      line: 90
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "Times contains schema and data times, used to get StartTimes for both"
+          }
+        }
+      }
+    }
+    types {
+      key: "UpdateEvent"
+      value {
+        tuple {
+          attr_defs {
+            key: "Data"
+            value {
+              primitive: ANY
+              source_context {
+                start {
+                  line: 117
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Deleted"
+            value {
+              primitive: BOOL
+              source_context {
+                start {
+                  line: 119
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Key"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 115
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "Schema"
+            value {
+              primitive: ANY
+              source_context {
+                start {
+                  line: 118
+                }
+              }
+            }
+          }
+          attr_defs {
+            key: "StartTime"
+            value {
+              primitive: STRING
+              source_context {
+                start {
+                  line: 116
+                }
+              }
+            }
+          }
+        }
+        attrs {
+          key: "doc"
+          value {
+            s: "UpdateEvent holds all information necessary to post to subscribes"
+          }
+        }
+      }
+    }
+  }
+}
