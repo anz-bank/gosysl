@@ -75,14 +75,12 @@ func TestGenSimpleType(tt *testing.T) {
 		assert.NoError(err)
 		assert.Equal(t.expected, str)
 	}
-	var errRefTests = []struct {
-		input []string
-	}{
-		{[]string{"MyType", "MyType"}},
-		{[]string{"map of string:int:bool"}},
+	errRefTests := [][]string{
+		{"MyType", "MyType"},
+		{"map of string:int:bool"},
 	}
 	for _, t := range errRefTests {
-		ref := &pb.Scope{Path: t.input}
+		ref := &pb.Scope{Path: t}
 		typeRef := &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}}
 		pt := &pb.Type{Type: typeRef}
 		_, err := GenSimpleType(pt)
@@ -252,4 +250,8 @@ func TestGentypesCornerCases(tt *testing.T) {
 	assert.Error(err)
 	_, err = GenTypes(map[string]*pb.Type{"x": ttype}, "-")
 	assert.Error(err)
+
+	_, err = GenStructField("", &pb.Type{}, "")
+	assert.Error(err)
+
 }

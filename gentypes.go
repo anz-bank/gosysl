@@ -66,11 +66,14 @@ func GenSimpleType(t *pb.Type) (string, error) {
 func GetLine(t *pb.Type) (int32, error) {
 	if t.GetPrimitive() != pb.Type_NO_Primitive || t.GetTypeRef() != nil {
 		return t.GetSourceContext().Start.Line, nil
-	} else if t.GetList() != nil {
+	}
+	if t.GetList() != nil {
 		return t.GetList().GetType().GetSourceContext().Start.Line, nil
-	} else if t.GetSet() != nil {
+	}
+	if t.GetSet() != nil {
 		return t.GetSet().GetSourceContext().Start.Line, nil
-	} else if t.GetTuple() != nil {
+	}
+	if t.GetTuple() != nil {
 		for _, t2 := range t.GetTuple().GetAttrDefs() {
 			return GetLine(t2)
 		}
@@ -109,14 +112,16 @@ func NamesSortedBySourceContext(types map[string]*pb.Type) ([]string, error) {
 // SplitUppercase splits into fields at all upper case letters and converts
 // fields to lower case
 func SplitUppercase(str string) []string {
-	result := []string{}
-	var i int
-	for s := str; s != ""; s = s[i:] {
-		i = strings.IndexFunc(s[1:], unicode.IsUpper) + 1
-		if i == 0 {
-			i = len(s)
+	result := make([]string, 0, 8)
+	idx := make([]int, 0, 8)
+	for pos, c := range str {
+		if unicode.IsUpper(c) || pos == 0 {
+			idx = append(idx, pos)
 		}
-		result = append(result, strings.ToLower(s[:i]))
+	}
+	idx = append(idx, len(str))
+	for i := 0; i < len(idx)-1; i++ {
+		result = append(result, strings.ToLower(str[idx[i]:idx[i+1]]))
 	}
 	return result
 }
@@ -156,6 +161,9 @@ func GenStructField(fieldName string, fieldType *pb.Type, sep string) (string, e
 	}
 	if err != nil {
 		return "", err
+	}
+	if typeStr == "" {
+		return "", fmt.Errorf("unknown type %s", fieldType.String())
 	}
 	jsonProp := GetJSONProperty(fieldName, fieldType, sep)
 	return fmt.Sprintf("%s `json:\"%s\"`\n", typeStr, jsonProp), nil
