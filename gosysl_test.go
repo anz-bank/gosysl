@@ -148,7 +148,6 @@ func TestEnd2End(tt *testing.T) {
 	assert.NoError(err)
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
-	//fmt.Println(result.Interface)
 	assert.Equal(expectedRest, result.Interface)
 
 	// failing gofmt
