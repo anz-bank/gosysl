@@ -32,16 +32,15 @@ func sortEpNames(endpoints map[string]*pb.Endpoint) []string {
 	return SortLineNames(lineNames)
 }
 
+var reMethodRemove = regexp.MustCompile(`[{}\s]`)
+var reMethodSeparate = regexp.MustCompile(`[._,#-]`)
+
 func genMethodName(ep *pb.Endpoint) string {
 	if n, ok := ep.Attrs["method_name"]; ok {
 		return n.GetS()
 	}
-
-	re := regexp.MustCompile(`[{}\s]`)
-	name := re.ReplaceAllLiteralString(ep.Name, "")
-
-	re = regexp.MustCompile(`[._,#-]`)
-	name = re.ReplaceAllLiteralString(name, "/")
+	name := reMethodRemove.ReplaceAllLiteralString(ep.Name, "")
+	name = reMethodSeparate.ReplaceAllLiteralString(name, "/")
 
 	fields := strings.Split(name, "/")
 	for i, field := range fields {
