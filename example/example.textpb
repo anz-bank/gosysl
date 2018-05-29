@@ -27,6 +27,12 @@ apps {
       value {
         name: "DELETE /api/admin/{key}"
         attrs {
+          key: "method_doc"
+          value {
+            s: "Admin"
+          }
+        }
+        attrs {
           key: "method_name"
           value {
             s: "DeleteDataSet"
@@ -111,7 +117,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 29
+                  line: 34
                 }
               }
             }
@@ -123,7 +129,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 29
+                  line: 34
                 }
               }
             }
@@ -172,7 +178,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 17
+                  line: 22
                 }
               }
             }
@@ -184,7 +190,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 17
+                  line: 22
                 }
               }
             }
@@ -388,6 +394,12 @@ apps {
       value {
         name: "GET /api/{key}"
         attrs {
+          key: "method_doc"
+          value {
+            s: "Data"
+          }
+        }
+        attrs {
           key: "method_name"
           value {
             s: "GetData"
@@ -423,7 +435,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 8
+                  line: 13
                 }
               }
             }
@@ -444,7 +456,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 8
+                  line: 13
                 }
               }
             }
@@ -493,7 +505,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 32
+                  line: 8
                 }
               }
             }
@@ -514,7 +526,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 32
+                  line: 8
                 }
               }
             }
@@ -527,6 +539,12 @@ apps {
       key: "GET /api/{key}/schema"
       value {
         name: "GET /api/{key}/schema"
+        attrs {
+          key: "method_doc"
+          value {
+            s: "Schema"
+          }
+        }
         attrs {
           key: "method_name"
           value {
@@ -563,7 +581,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 20
+                  line: 25
                 }
               }
             }
@@ -584,7 +602,7 @@ apps {
               }
               source_context {
                 start {
-                  line: 20
+                  line: 25
                 }
               }
             }
@@ -633,7 +651,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 25
+                  line: 30
                 }
               }
             }
@@ -645,7 +663,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 25
+                  line: 30
                 }
               }
             }
@@ -694,7 +712,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 13
+                  line: 18
                 }
               }
             }
@@ -706,7 +724,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 13
+                  line: 18
                 }
               }
             }
@@ -987,7 +1005,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 10
+                  line: 15
                 }
               }
             }
@@ -1048,7 +1066,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 34
+                  line: 10
                 }
               }
             }
@@ -1109,7 +1127,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 22
+                  line: 27
                 }
               }
             }
@@ -1170,7 +1188,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 27
+                  line: 32
                 }
               }
             }
@@ -1182,7 +1200,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 27
+                  line: 32
                 }
               }
             }
@@ -1243,7 +1261,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 15
+                  line: 20
                 }
               }
             }
@@ -1255,7 +1273,7 @@ apps {
               primitive: STRING
               source_context {
                 start {
-                  line: 15
+                  line: 20
                 }
               }
             }

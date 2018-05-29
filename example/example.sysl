@@ -4,8 +4,13 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
             return Keys
         POST (ds <: DataSetPayload) [method_name="CreateDataSet"]:
             return Key
+    /api/{key<:string}/name  [middleware="AuthorizeDataSet"]:
+            GET ?time={queryTime<:string} [method_name="GetDataSetName"]:
+                return KeyName
+            PUT(np <: NamePayload) [method_name="PutDataSetName"]:
+                return KeyName
     /api/{key<:string}  [middleware="AuthorizeDataSet"]:
-        GET ?time={queryTime<:string} [method_name="GetData"]:
+        GET ?time={queryTime<:string} [method_name="GetData",  method_doc="Data"]:
             return Data
         PUT(dp <: DataPayload) [method_name="PutData"]:
             return Data
@@ -17,7 +22,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
             DELETE [method_name="DeleteData"]:
                 return
         /schema:
-            GET ?time={queryTime<:string} [method_name="GetSchema"]:
+            GET ?time={queryTime<:string} [method_name="GetSchema",  method_doc="Schema"]:
                 return Schema
             PUT(sp <: SchemaPayload) [method_name="PutSchema"]:
                 return Schema
@@ -28,13 +33,8 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
                 return Schema
             DELETE [method_name="DeleteSchema"]:
                 return
-        /name:
-            GET ?time={queryTime<:string} [method_name="GetDataSetName"]:
-                return KeyName
-            PUT(np <: NamePayload) [method_name="PutDataSetName"]:
-                return KeyName
     /api/admin/{key<:string}  [middleware="AuthorizeDataSet"]:
-        DELETE [method_name="DeleteDataSet"]:
+        DELETE [method_name="DeleteDataSet",  method_doc="Admin"]:
             return
         /start-times:
             GET [method_name="GetStartTimes"]:

@@ -119,7 +119,7 @@ func TestGenStruct(tt *testing.T) {
 	str, err := GenStruct("DataPayload", ttype, "")
 	assert.NoError(err)
 	expectedSrc := `type DataPayload struct {
-			Data interface{} ` + "`" + `json:"Data"` + "`" + `
+			Data interface{} ` + "`json:\"Data\"`" + `
 		}` + "\n"
 	expected, _ := format.Source([]byte(expectedSrc))
 	assert.Equal(string(expected), str)
@@ -219,13 +219,13 @@ func TestGentypesCornerCases(tt *testing.T) {
 	_, err := Generate(module, "")
 	assert.Error(err)
 
-	_, err = GetLine(&pb.Type{})
+	_, err = GetTypeLine(&pb.Type{})
 	assert.Error(err)
 
 	types := map[string]*pb.Type{"x": {}}
 	_, err = NamesSortedBySourceContext(types)
 	assert.Error(err)
-	_, err = GenTypes(types, "")
+	_, err = GenTypes(&pb.Application{Types: types})
 	assert.Error(err)
 	module.Apps = map[string]*pb.Application{"x": {Types: types}}
 	_, err = Generate(module, "")
@@ -248,7 +248,11 @@ func TestGentypesCornerCases(tt *testing.T) {
 	}
 	_, err = GenStruct("DataPayload", ttype, "")
 	assert.Error(err)
-	_, err = GenTypes(map[string]*pb.Type{"x": ttype}, "-")
+	types = map[string]*pb.Type{"x": ttype}
+	_, err = GenTypes(&pb.Application{Types: types})
+	assert.Error(err)
+
+	_, _, err = GenType(&pb.Type{})
 	assert.Error(err)
 
 	_, err = GenStructField("", &pb.Type{}, "")

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"sort"
 	"strings"
 	"unicode"
 
@@ -62,20 +61,20 @@ func GenSimpleType(t *pb.Type) (string, error) {
 
 }
 
-// GetLine returns the line for a given Sysl type from its SourceContext
-func GetLine(t *pb.Type) (int32, error) {
+// GetTypeLine returns the line for a given Sysl type from its SourceContext
+func GetTypeLine(t *pb.Type) (int32, error) {
 	if t.GetPrimitive() != pb.Type_NO_Primitive || t.GetTypeRef() != nil {
-		return t.GetSourceContext().Start.Line, nil
+		return t.SourceContext.Start.Line, nil
 	}
 	if t.GetList() != nil {
-		return t.GetList().GetType().GetSourceContext().Start.Line, nil
+		return t.GetList().GetType().SourceContext.Start.Line, nil
 	}
 	if t.GetSet() != nil {
-		return t.GetSet().GetSourceContext().Start.Line, nil
+		return t.GetSet().SourceContext.Start.Line, nil
 	}
 	if t.GetTuple() != nil {
 		for _, t2 := range t.GetTuple().GetAttrDefs() {
-			return GetLine(t2)
+			return GetTypeLine(t2)
 		}
 	}
 	return 0, fmt.Errorf("unknown type %v for getting line", t)
@@ -84,29 +83,17 @@ func GetLine(t *pb.Type) (int32, error) {
 //NamesSortedBySourceContext sorts the keys of the input types according to occurrence
 // in Sysl definition file, derived from SourceContext
 func NamesSortedBySourceContext(types map[string]*pb.Type) ([]string, error) {
-	type lineName struct {
-		name string
-		line int32
-	}
-	size := len(types)
-	lineNames := make([]lineName, size)
+	lineNames := make([]LineName, len(types))
 	i := 0
 	for name, t := range types {
-		line, err := GetLine(t)
+		line, err := GetTypeLine(t)
 		if err != nil {
 			return nil, err
 		}
-		lineNames[i] = lineName{name, line}
+		lineNames[i] = LineName{name, line}
 		i++
 	}
-	sort.Slice(lineNames, func(i, j int) bool {
-		return lineNames[i].line < lineNames[j].line
-	})
-	result := make([]string, size)
-	for i := 0; i < size; i++ {
-		result[i] = lineNames[i].name
-	}
-	return result, nil
+	return SortLineNames(lineNames), nil
 }
 
 // SplitUppercase splits into fields at all upper case letters and converts
@@ -137,36 +124,43 @@ func GetJSONProperty(name string, t *pb.Type, sep string) string {
 	return strings.Join(SplitUppercase(name), sep)
 }
 
-// GenStructField creates a single line inside a struct definition
-func GenStructField(fieldName string, fieldType *pb.Type, sep string) (string, error) {
-	var typeStr string
+// GenType creates golang type for given sysl type
+func GenType(t *pb.Type) (string, *pb.Type, error) {
 	var err error
-	if fieldType.GetPrimitive() != pb.Type_NO_Primitive || fieldType.GetTypeRef() != nil {
+	var typeStr string
+	if t.GetPrimitive() != pb.Type_NO_Primitive || t.GetTypeRef() != nil {
 		// Primitive type, reference or map
-		if typeStr, err = GenSimpleType(fieldType); err == nil {
-			typeStr = fmt.Sprintf("%s %s ", fieldName, typeStr)
+		if typeStr, err = GenSimpleType(t); err == nil {
+			return typeStr, t, nil
 		}
-	} else if fieldType.GetList() != nil {
+	} else if t.GetList() != nil {
 		// List
-		fieldType = fieldType.GetList().GetType()
-		if typeStr, err = GenSimpleType(fieldType); err == nil {
-			typeStr = fmt.Sprintf("%s []%s ", fieldName, typeStr)
+		t = t.GetList().GetType()
+		if typeStr, err = GenSimpleType(t); err == nil {
+			return fmt.Sprintf("[]%s", typeStr), t, nil
 		}
-	} else if fieldType.GetSet() != nil {
+	} else if t.GetSet() != nil {
 		// Set
-		fieldType = fieldType.GetSet()
-		if typeStr, err = GenSimpleType(fieldType); err == nil {
-			typeStr = fmt.Sprintf("%s map[%s]interface{} ", fieldName, typeStr)
+		t = t.GetSet()
+		if typeStr, err = GenSimpleType(t); err == nil {
+			return fmt.Sprintf("map[%s]interface{}", typeStr), t, nil
 		}
 	}
 	if err != nil {
+		return "", nil, err
+	}
+	return "", nil, fmt.Errorf("unknown type %s", t.String())
+}
+
+// GenStructField creates a single line inside a struct definition
+func GenStructField(fieldName string, fieldType *pb.Type, sep string) (string, error) {
+	fieldTypeStr, subType, err := GenType(fieldType)
+	if err != nil {
 		return "", err
 	}
-	if typeStr == "" {
-		return "", fmt.Errorf("unknown type %s", fieldType.String())
-	}
-	jsonProp := GetJSONProperty(fieldName, fieldType, sep)
-	return fmt.Sprintf("%s `json:\"%s\"`\n", typeStr, jsonProp), nil
+	jsonProp := GetJSONProperty(fieldName, subType, sep)
+	structField := fmt.Sprintf("%s %s `json:\"%s\"`\n", fieldName, fieldTypeStr, jsonProp)
+	return structField, nil
 }
 
 //GenStruct creates a Golang `struct` type definition from a Sysl Tuple type definition
@@ -201,12 +195,18 @@ func GenStruct(name string, t *pb.Type, jsonSep string) (string, error) {
 
 // GenTypes creates all types definition in SourceContext order for given Sysl
 // type definition
-func GenTypes(types map[string]*pb.Type, jsonSep string) (string, error) {
+func GenTypes(app *pb.Application) (string, error) {
+	types := app.GetTypes()
 	names, err := NamesSortedBySourceContext(types)
 	if err != nil {
 		return "", err
 	}
 	var buffer bytes.Buffer
+	var jsonSep string
+	if attr, ok := app.Attrs["json_property_separator"]; ok {
+		jsonSep = attr.GetS()
+	}
+
 	for _, name := range names {
 		t := types[name]
 		str, err := GenStruct(name, t, jsonSep)
