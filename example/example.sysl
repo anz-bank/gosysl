@@ -33,7 +33,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
                 return Schema
             DELETE [method_name="DeleteSchema"]:
                 return
-    /api/admin/{key<:string}  [middleware="AuthorizeDataSet"]:
+    /api/admin/{key<:string}  [middleware="AuthorizeAdmin"]:
         DELETE [method_name="DeleteDataSet",  method_doc="Admin"]:
             return
         /start-times:

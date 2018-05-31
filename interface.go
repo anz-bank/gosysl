@@ -10,28 +10,6 @@ import (
 	"github.com/anz-bank/gosysl/pb"
 )
 
-func getEndpointLine(ep *pb.Endpoint) int32 {
-	params := ep.RestParams.QueryParam
-	if len(params) == 0 {
-		if strings.HasPrefix(strings.ToLower(ep.Name), "get") {
-			return -1
-		}
-		return 0
-	}
-	return params[0].Type.SourceContext.Start.Line
-}
-
-func sortEpNames(endpoints map[string]*pb.Endpoint) []string {
-	lineNames := make([]LineName, len(endpoints))
-	i := 0
-	for name, t := range endpoints {
-		line := getEndpointLine(t)
-		lineNames[i] = LineName{name, line}
-		i++
-	}
-	return SortLineNames(lineNames)
-}
-
 var reMethodRemove = regexp.MustCompile(`[{}\s]`)
 var reMethodSeparate = regexp.MustCompile(`[._,#-]`)
 
@@ -52,6 +30,9 @@ func genMethodName(ep *pb.Endpoint) string {
 var curlyRe = regexp.MustCompile(`^\s*{\s*(\w+)\s*<:\s*(\w+)\s*}\s*$`)
 
 func genParams(ep *pb.Endpoint) (string, error) {
+	if ep.RestParams == nil {
+		return "", nil
+	}
 	params := make([]string, 0, 8)
 	for _, param := range ep.RestParams.QueryParam {
 		name := param.Name
@@ -106,7 +87,7 @@ func genMethod(ep *pb.Endpoint) (string, error) {
 }
 
 // GenInterface creates for methods called in REST endpoints.
-func GenInterface(app *pb.Application) (string, error) {
+func GenInterface(app *pb.Application, epNames []string) (string, error) {
 	var buffer bytes.Buffer
 	if attr, ok := app.Attrs["interface_doc"]; ok {
 		buffer.WriteString(fmt.Sprintf("// %s \n", attr.GetS()))
@@ -117,8 +98,7 @@ func GenInterface(app *pb.Application) (string, error) {
 	}
 	buffer.WriteString(fmt.Sprintf("type %s interface {\n", interfaceName))
 
-	names := sortEpNames(app.Endpoints)
-	for _, name := range names {
+	for _, name := range epNames {
 		method, err := genMethod(app.Endpoints[name])
 		if err != nil {
 			return "", err

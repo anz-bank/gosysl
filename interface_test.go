@@ -48,7 +48,7 @@ func TestBadInput(tt *testing.T) {
 	app := &pb.Application{
 		Endpoints: map[string]*pb.Endpoint{"x": ep},
 	}
-	_, err = GenInterface(app)
+	_, err = GenInterface(app, []string{"x"})
 	assert.Error(err)
 
 	app.Endpoints = nil
@@ -57,7 +57,7 @@ func TestBadInput(tt *testing.T) {
 	}
 	attrs := map[string]*pb.Attribute{"interface": a}
 	app.Attrs = attrs
-	_, err = GenInterface(app)
+	_, err = GenInterface(app, nil)
 	assert.Error(err)
 
 	module := &pb.Module{

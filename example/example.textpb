@@ -41,7 +41,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -255,7 +255,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -304,7 +304,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -353,7 +353,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -795,7 +795,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -856,7 +856,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {
@@ -917,7 +917,7 @@ apps {
         attrs {
           key: "middleware"
           value {
-            s: "AuthorizeDataSet"
+            s: "AuthorizeAdmin"
           }
         }
         attrs {

@@ -9,7 +9,7 @@ import (
 	testifyAssert "github.com/stretchr/testify/assert"
 )
 
-var expectedRest = `package mypkg
+var expectedInterface = `package mypkg
 
 // Storer abstracts all required RefData persistence and retrieval
 type Storer interface {
@@ -139,6 +139,17 @@ type UpdateEvent struct {
 }
 `
 
+var expectedMiddleware = `package mypkg
+
+import "net/http"
+
+type Middleware interface {
+	AuthorizeRoot() []func(next http.Handler) http.Handler
+	AuthorizeDataSet() []func(next http.Handler) http.Handler
+	AuthorizeAdmin() []func(next http.Handler) http.Handler
+}
+`
+
 func TestEnd2End(tt *testing.T) {
 	assert := testifyAssert.New(tt)
 	data, err := ioutil.ReadFile("example/example.pb")
@@ -148,7 +159,9 @@ func TestEnd2End(tt *testing.T) {
 	assert.NoError(err)
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
-	assert.Equal(expectedRest, result.Interface)
+	assert.Equal(expectedInterface, result.Interface)
+	assert.Equal(expectedMiddleware, result.Middleware)
+	assert.Equal("GET /api", result.Rest)
 
 	// failing gofmt
 	_, err = Generate(module, "BAD PACKAGE NAME")
@@ -160,4 +173,15 @@ func TestGetPackage(tt *testing.T) {
 
 	assert.Equal("x", GetPackage("x"))
 	assert.Equal("y", GetPackage("x/y"))
+}
+
+func TestGetApp(tt *testing.T) {
+	assert := testifyAssert.New(tt)
+
+	module := &pb.Module{}
+	module.Apps = map[string]*pb.Application{}
+	module.Apps["1"] = nil
+	module.Apps["2"] = nil
+	_, err := getApp(module)
+	assert.Error(err)
 }
