@@ -190,7 +190,359 @@ var expectedRest = "package mypkg\n\n" + restPrefix + `
 // Keys for Context lookup
 const (
 	KeyKey ContextKeyType = iota
-	TimeKey
 	StartTimeKey
 )
+
+// NewRestHandler creates a new Handler persisting data to Storer.
+func NewRestHandler(s Storer, m Middleware) RestHandler {
+	r := chi.NewRouter()
+	r.Use(m.Root()...)
+	rh := RestHandler{s, r}
+
+	r.Route("/api", func(r chi.Router) {
+		r.Use(m.AuthorizeRoot()...)
+		r.Get("/", rh.handleGetKeys)
+		r.Post("/", rh.handleCreateDataSet)
+	})
+	r.Route("/api/{key}/name", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeDataSet()...)
+		r.Get("/", rh.handleGetDataSetName)
+		r.Put("/", rh.handlePutDataSetName)
+	})
+	r.Route("/api/{key}", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeDataSet()...)
+		r.Get("/", rh.handleGetData)
+		r.Put("/", rh.handlePutData)
+	})
+	r.Route("/api/{key}/{startTime}", func(r chi.Router) {
+		r.Use(makeContextSaver(StartTimeKey, "startTime"))
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeDataSet()...)
+		r.Get("/", rh.handleGetDataWithStart)
+		r.Put("/", rh.handlePutDataWithStart)
+		r.Delete("/", rh.handleDeleteData)
+	})
+	r.Route("/api/{key}/schema", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeDataSet()...)
+		r.Get("/", rh.handleGetSchema)
+		r.Put("/", rh.handlePutSchema)
+	})
+	r.Route("/api/{key}/schema/{startTime}", func(r chi.Router) {
+		r.Use(makeContextSaver(StartTimeKey, "startTime"))
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeDataSet()...)
+		r.Get("/", rh.handleGetSchemaWithStart)
+		r.Put("/", rh.handlePutSchemaWithStart)
+		r.Delete("/", rh.handleDeleteSchema)
+	})
+	r.Route("/api/admin/{key}", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Delete("/", rh.handleDeleteDataSet)
+	})
+	r.Route("/api/admin/{key}/start-times", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Get("/", rh.handleGetStartTimes)
+	})
+	r.Route("/api/admin/{key}/creation-times", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Get("/", rh.handleGetCreationTimes)
+	})
+	r.Route("/api/admin/{key}/restrictions", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Get("/", rh.handleGetRestriction)
+		r.Put("/", rh.handlePutRestriction)
+	})
+	r.Route("/api/admin/{key}/subscribe", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Post("/", rh.handlePutSubscription)
+	})
+	r.Route("/api/admin/{key}/unsubscribe", func(r chi.Router) {
+		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(m.AuthorizeAdmin()...)
+		r.Post("/", rh.handleDeleteSubscription)
+	})
+	return rh
+}
+
+func (rh *RestHandler) handleGetKeys(w http.ResponseWriter, r *http.Request) {
+	result, err := rh.storer.GetKeys()
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleCreateDataSet(w http.ResponseWriter, r *http.Request) {
+	var payload DataSetPayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.CreateDataSet(payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.Status(r, http.StatusCreated)
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetDataSetName(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	result, err := rh.storer.GetDataSetName(key, time)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutDataSetName(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	var payload NamePayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutDataSetName(key, time, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetData(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	result, err := rh.storer.GetData(key, time)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutData(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	var payload DataPayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutData(key, time, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetDataWithStart(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	result, err := rh.storer.GetDataWithStart(startTime, key)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutDataWithStart(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	var payload DataPayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutDataWithStart(startTime, key, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleDeleteData(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	if err := rh.storer.DeleteData(startTime, key); err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.NoContent(w, r)
+}
+
+func (rh *RestHandler) handleGetSchema(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	result, err := rh.storer.GetSchema(key, time)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutSchema(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	queryTime := r.URL.Query().Get("time")
+	var payload SchemaPayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutSchema(key, time, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetSchemaWithStart(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	result, err := rh.storer.GetSchemaWithStart(startTime, key)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutSchemaWithStart(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	var payload SchemaPayload
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutSchemaWithStart(startTime, key, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleDeleteSchema(w http.ResponseWriter, r *http.Request) {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	key := r.Context().Value(KeyKey).(string)
+	if err := rh.storer.DeleteSchema(startTime, key); err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.NoContent(w, r)
+}
+
+func (rh *RestHandler) handleDeleteDataSet(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	if err := rh.storer.DeleteDataSet(key); err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.NoContent(w, r)
+}
+
+func (rh *RestHandler) handleGetStartTimes(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	result, err := rh.storer.GetStartTimes(key)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetCreationTimes(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	result, err := rh.storer.GetCreationTimes(key)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleGetRestriction(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	result, err := rh.storer.GetRestriction(key)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutRestriction(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	var payload Restriction
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutRestriction(key, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handlePutSubscription(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	var payload Subscription
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.PutSubscription(key, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.Status(r, http.StatusCreated)
+	render.JSON(w, r, result)
+}
+
+func (rh *RestHandler) handleDeleteSubscription(w http.ResponseWriter, r *http.Request) {
+	key := r.Context().Value(KeyKey).(string)
+	var payload Subscription
+	if err := decodeJSON(r.Body, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := rh.storer.DeleteSubscription(key, payload)
+	if err != nil {
+		http.Error(w, err.Error(), getStatus(err))
+		return
+	}
+	render.Status(r, http.StatusCreated)
+	render.JSON(w, r, result)
+}
 `

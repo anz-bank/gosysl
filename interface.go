@@ -13,7 +13,8 @@ import (
 var reMethodRemove = regexp.MustCompile(`[{}\s]`)
 var reMethodSeparate = regexp.MustCompile(`[._,#-]`)
 
-func genMethodName(ep *pb.Endpoint) string {
+// GenMethodName creates the interface method name from pattern path
+func GenMethodName(ep *pb.Endpoint) string {
 	if n, ok := ep.Attrs["method_name"]; ok {
 		return n.GetS()
 	}
@@ -73,7 +74,7 @@ func genMethod(ep *pb.Endpoint) (string, error) {
 	if attr, ok := ep.Attrs["method_doc"]; ok {
 		buffer.WriteString(fmt.Sprintf("\n// %s \n", attr.GetS()))
 	}
-	name := genMethodName(ep)
+	name := GenMethodName(ep)
 	params, err := genParams(ep)
 	if err != nil {
 		return "", err

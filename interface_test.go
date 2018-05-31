@@ -19,7 +19,7 @@ func TestGenMethodName(tt *testing.T) {
 
 	for _, t := range tests {
 		ep := &pb.Endpoint{Name: t.input}
-		assert.Equal(t.expected, genMethodName(ep))
+		assert.Equal(t.expected, GenMethodName(ep))
 	}
 }
 

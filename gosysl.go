@@ -53,7 +53,6 @@ func genRestFile(app *pb.Application, epNames []string, pkg string) (string, err
 	buffer.WriteString(rest)
 	b, err := format.Source(buffer.Bytes())
 	if err != nil {
-		fmt.Println("---------- FORMATTING", buffer.String())
 		return "", err
 	}
 	return string(b), nil
