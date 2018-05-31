@@ -9,6 +9,42 @@ import (
 	testifyAssert "github.com/stretchr/testify/assert"
 )
 
+func TestEnd2End(tt *testing.T) {
+	assert := testifyAssert.New(tt)
+	data, err := ioutil.ReadFile("example/example.pb")
+	assert.NoError(err)
+	module := &pb.Module{}
+	err = proto.Unmarshal(data, module)
+	assert.NoError(err)
+	result, err := Generate(module, "mypkg")
+	assert.NoError(err)
+	assert.Equal(expectedInterface, result.Interface)
+	assert.Equal(expectedMiddleware, result.Middleware)
+	assert.Equal(expectedRest, result.Rest)
+
+	// failing gofmt
+	_, err = Generate(module, "BAD PACKAGE NAME")
+	assert.Error(err)
+}
+
+func TestGetPackage(tt *testing.T) {
+	assert := testifyAssert.New(tt)
+
+	assert.Equal("x", GetPackage("x"))
+	assert.Equal("y", GetPackage("x/y"))
+}
+
+func TestGetApp(tt *testing.T) {
+	assert := testifyAssert.New(tt)
+
+	module := &pb.Module{}
+	module.Apps = map[string]*pb.Application{}
+	module.Apps["1"] = nil
+	module.Apps["2"] = nil
+	_, err := getApp(module)
+	assert.Error(err)
+}
+
 var expectedInterface = `package mypkg
 
 // Storer abstracts all required RefData persistence and retrieval
@@ -150,38 +186,11 @@ type Middleware interface {
 }
 `
 
-func TestEnd2End(tt *testing.T) {
-	assert := testifyAssert.New(tt)
-	data, err := ioutil.ReadFile("example/example.pb")
-	assert.NoError(err)
-	module := &pb.Module{}
-	err = proto.Unmarshal(data, module)
-	assert.NoError(err)
-	result, err := Generate(module, "mypkg")
-	assert.NoError(err)
-	assert.Equal(expectedInterface, result.Interface)
-	assert.Equal(expectedMiddleware, result.Middleware)
-	assert.Equal("GET /api", result.Rest)
-
-	// failing gofmt
-	_, err = Generate(module, "BAD PACKAGE NAME")
-	assert.Error(err)
-}
-
-func TestGetPackage(tt *testing.T) {
-	assert := testifyAssert.New(tt)
-
-	assert.Equal("x", GetPackage("x"))
-	assert.Equal("y", GetPackage("x/y"))
-}
-
-func TestGetApp(tt *testing.T) {
-	assert := testifyAssert.New(tt)
-
-	module := &pb.Module{}
-	module.Apps = map[string]*pb.Application{}
-	module.Apps["1"] = nil
-	module.Apps["2"] = nil
-	_, err := getApp(module)
-	assert.Error(err)
-}
+var expectedRest = "package mypkg\n\n" + restPrefix + `
+// Keys for Context lookup
+const (
+	KeyKey ContextKeyType = iota
+	TimeKey
+	StartTimeKey
+)
+`

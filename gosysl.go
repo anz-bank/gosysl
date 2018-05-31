@@ -45,14 +45,18 @@ func Generate(module *pb.Module, pkg string) (CodeResult, error) {
 }
 
 func genRestFile(app *pb.Application, epNames []string, pkg string) (string, error) {
-	if len(app.Name.Part) > 0 && app.Name.Part[0] == "BAD" {
-		return pkg, fmt.Errorf("100")
+	buffer := bytes.NewBufferString(fmt.Sprintf("package %s\n\n%s\n", pkg, restPrefix))
+	rest, err := GenRest(app, epNames)
+	if err != nil {
+		return "", err
 	}
-	res := ""
-	if len(epNames) > 0 {
-		res = epNames[0]
+	buffer.WriteString(rest)
+	b, err := format.Source(buffer.Bytes())
+	if err != nil {
+		fmt.Println("---------- FORMATTING", buffer.String())
+		return "", err
 	}
-	return res, nil
+	return string(b), nil
 }
 
 func genInterfaceFile(app *pb.Application, epNames []string, pkg string) (string, error) {
@@ -150,3 +154,57 @@ func sortEpNames(endpoints map[string]*pb.Endpoint) []string {
 	}
 	return SortLineNames(lineNames)
 }
+
+const restPrefix = `import (
+	"context"
+	"encoding/json"
+	"io"
+	"io/ioutil"
+	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
+)
+
+// RestHandler implements Handler and contains all routes for RefData REST API.
+type RestHandler struct {
+	storer Storer
+	router *chi.Mux
+}
+
+func (rh *RestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	rh.router.ServeHTTP(w, r)
+}
+
+// StatusError extends the error interface to hold a http.Status
+type StatusError interface {
+	Error() string
+	Status() int
+}
+
+func getStatus(err error) int {
+	if statusErr, ok := err.(StatusError); ok {
+		return statusErr.Status()
+	}
+	return http.StatusInternalServerError
+}
+
+// ContextKeyType is the enum type for keys in Context
+type ContextKeyType int
+
+func makeContextSaver(key ContextKeyType, urlParam string) ` +
+	`func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			up := chi.URLParam(r, urlParam)
+			ctx := context.WithValue(r.Context(), key, up)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func decodeJSON(r io.Reader, v interface{}) error {
+	defer io.Copy(ioutil.Discard, r) // nolint: errcheck
+	return json.NewDecoder(r).Decode(v)
+}
+`

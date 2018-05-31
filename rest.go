@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"strings"
 
 	"github.com/anz-bank/gosysl/pb"
 )
@@ -22,15 +23,60 @@ func GenMiddleware(app *pb.Application, epNames []string) (string, error) {
 		}
 	}
 
-	buffer := bytes.NewBufferString("type Middleware interface {\n")
+	var buffer bytes.Buffer
+	buffer.WriteString("type Middleware interface {\n")
 	for _, m := range middlewares {
 		s := fmt.Sprintf("%s () []func(next http.Handler) http.Handler\n", m)
-		buffer.WriteString(s) // nolint: gas
+		buffer.WriteString(s)
 	}
-	buffer.WriteString("}\n") // nolint: gas
+	buffer.WriteString("}\n")
 	b, err := format.Source(buffer.Bytes())
 	if err != nil {
 		return "", err
 	}
 	return string(b), nil
+}
+
+// GenRest creates the contextkeys, routes and handlers for actual REST handlers
+func GenRest(app *pb.Application, epNames []string) (string, error) {
+	buffer := bytes.NewBufferString(genContextKeys(app, epNames))
+	return buffer.String(), nil
+}
+
+func genContextKeys(app *pb.Application, epNames []string) string {
+	keys := getContextKeys(app, epNames)
+	if len(keys) == 0 {
+		return ""
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString("// Keys for Context lookup\nconst (\n")
+	s := fmt.Sprintf("%s ContextKeyType = iota\n", getContextKey(keys[0]))
+	buffer.WriteString(s)
+	for i := 1; i < len(keys); i++ {
+		buffer.WriteString(getContextKey(keys[i]) + "\n")
+	}
+	buffer.WriteString(")\n")
+	return buffer.String()
+}
+
+func getContextKey(param string) string {
+	return strings.Title(param) + "Key"
+}
+
+func getContextKeys(app *pb.Application, epNames []string) []string {
+	set := make(map[string]interface{}, len(epNames))
+	result := make([]string, 0, len(epNames))
+	for _, name := range epNames {
+		rp := app.Endpoints[name].RestParams
+		if rp == nil {
+			continue
+		}
+		for _, qp := range rp.QueryParam {
+			if _, ok := set[qp.Name]; !ok {
+				set[qp.Name] = struct{}{}
+				result = append(result, qp.Name)
+			}
+		}
+	}
+	return result
 }

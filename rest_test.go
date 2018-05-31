@@ -35,15 +35,6 @@ func TestRestCornerCases(tt *testing.T) {
 	_, err = Generate(module, "pkg")
 	assert.Error(err)
 
-	app = &pb.Application{Name: &pb.AppName{
-		Part: []string{"BAD"}},
-	}
-	module = &pb.Module{
-		Apps: map[string]*pb.Application{"app": app},
-	}
-	_, err = Generate(module, "pkg")
-	assert.Error(err)
-
 	_, err = genMiddlewareFile(&pb.Application{}, nil, "BAD PACKAGE")
 	assert.Error(err)
 
