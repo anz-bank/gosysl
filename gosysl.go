@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -108,8 +109,12 @@ func getApp(module *pb.Module) (*pb.Application, error) {
 
 // GetPackage extracts package name from output directory
 func GetPackage(outDir string) string {
-	l := strings.Split(outDir, "/")
-	return l[len(l)-1]
+	dirs, last := filepath.Split(outDir)
+	if last == "" {
+		_, last = filepath.Split(dirs)
+
+	}
+	return last
 }
 
 // LineName contains name, such as type or endpoint name and corresponding line

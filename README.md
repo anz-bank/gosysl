@@ -12,7 +12,7 @@ Usage
 ```bash
 go install github.com/anz-bank/gosysl/cmd/sysl-go-rest
 sysl pb example.sysl -o example.pb
-sysl-go-rest example.pb
+sysl-go-rest example.pb pkg
 ```
 
 Compiling the protobuf file
