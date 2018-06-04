@@ -236,12 +236,12 @@ func getRoutes(app *pb.Application, epNames []string) (routes, error) {
 			msg := `expect "GET|POST|etc path/path" as endpoint name (%s) `
 			return routes{}, fmt.Errorf(msg, name)
 		}
-		endpoint := app.Endpoints[name]
-		httpPath := fields[1]
 		httpMethod := strings.Title(strings.ToLower(fields[0]))
 		if _, ok := validHTTPMethods[httpMethod]; !ok {
 			return routes{}, fmt.Errorf("invalid HTTP Method (%s)", httpMethod)
 		}
+		endpoint := app.Endpoints[name]
+		httpPath := fields[1]
 		if _, ok := content[httpPath]; !ok {
 			middleware := ""
 			if m, ok := endpoint.Attrs["middleware"]; ok {
@@ -304,10 +304,10 @@ func getQueryParams(ep *pb.Endpoint) []string {
 }
 
 func getParams(ep *pb.Endpoint, queryType bool) []string {
-	result := make([]string, 0, len(ep.RestParams.QueryParam))
-	if ep.RestParams == nil {
-		return result
+	if ep == nil || ep.RestParams == nil {
+		return nil
 	}
+	result := make([]string, 0, len(ep.RestParams.QueryParam))
 	for _, qp := range ep.RestParams.QueryParam {
 		if (queryType && qp.Type.GetTypeRef() != nil) ||
 			(!queryType && qp.Type.GetTypeRef() == nil) {
