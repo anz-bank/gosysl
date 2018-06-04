@@ -45,7 +45,7 @@ func TestGetApp(tt *testing.T) {
 	assert.Error(err)
 }
 
-var expectedInterface = `package mypkg
+var expectedInterface = autoGenPrefix + `package mypkg
 
 // Storer abstracts all required RefData persistence and retrieval
 type Storer interface {
@@ -175,7 +175,7 @@ type UpdateEvent struct {
 }
 `
 
-var expectedMiddleware = `package mypkg
+var expectedMiddleware = autoGenPrefix + `package mypkg
 
 import "net/http"
 
@@ -186,7 +186,7 @@ type Middleware interface {
 }
 `
 
-var expectedRest = "package mypkg\n\n" + restPrefix + `
+var expectedRest = autoGenPrefix + "package mypkg\n\n" + restPrefix + `
 // Keys for Context lookup
 const (
 	KeyKey ContextKeyType = iota
