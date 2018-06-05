@@ -1,13 +1,14 @@
 package gosysl
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/anz-bank/gosysl/pb"
 	testifyAssert "github.com/stretchr/testify/assert"
 )
 
-func TestGenMethodName(tt *testing.T) {
+func TestWriteMethodName(tt *testing.T) {
 	assert := testifyAssert.New(tt)
 	var tests = []struct {
 		input    string
@@ -19,7 +20,7 @@ func TestGenMethodName(tt *testing.T) {
 
 	for _, t := range tests {
 		ep := &pb.Endpoint{Name: t.input}
-		assert.Equal(t.expected, GenMethodName(ep))
+		assert.Equal(t.expected, GetMethodName(ep))
 	}
 }
 
@@ -33,22 +34,23 @@ func TestBadInput(tt *testing.T) {
 	qpSlice := []*pb.Endpoint_RestParams_QueryParam{qp}
 	rp := &pb.Endpoint_RestParams{QueryParam: qpSlice}
 	ep := &pb.Endpoint{RestParams: rp}
-	_, err := genParams(ep)
+	_, err := getParams(ep)
 	assert.Error(err)
 
-	_, err = genReturnTypes(ep)
+	_, err = getReturnTypes(ep)
 	assert.Error(err)
 
-	_, err = genMethod(ep)
-	assert.Error(err)
+	w := &bytes.Buffer{}
+	assert.Error(writeMethod(w, ep))
 	ep.RestParams.QueryParam = nil
-	_, err = genMethod(ep)
-	assert.Error(err)
+	assert.Error(writeMethod(w, ep))
 
 	app := &pb.Application{
 		Endpoints: map[string]*pb.Endpoint{"x": ep},
 	}
-	_, err = GenInterface(app, []string{"x"})
+	assert.Error(WriteInterface(w, app, []string{"x"}))
+
+	_, err = genInterfaceFile(app, []string{"x"}, "pkg")
 	assert.Error(err)
 
 	app.Endpoints = nil
@@ -57,9 +59,7 @@ func TestBadInput(tt *testing.T) {
 	}
 	attrs := map[string]*pb.Attribute{"interface": a}
 	app.Attrs = attrs
-	_, err = GenInterface(app, nil)
-	assert.Error(err)
-
+	assert.NoError(WriteInterface(w, app, nil))
 	module := &pb.Module{
 		Apps: map[string]*pb.Application{"x": app},
 	}

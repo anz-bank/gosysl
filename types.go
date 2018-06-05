@@ -1,17 +1,16 @@
 package gosysl
 
 import (
-	"bytes"
 	"fmt"
-	"go/format"
+	"io"
 	"strings"
 	"unicode"
 
 	"github.com/anz-bank/gosysl/pb"
 )
 
-// GenPrimitiveType return Golang type string for Sysl primitive data type
-func GenPrimitiveType(tp *pb.Type_Primitive) (string, error) {
+// GetPrimitiveType return Golang type string for Sysl primitive data type
+func GetPrimitiveType(tp *pb.Type_Primitive) (string, error) {
 	switch *tp {
 	case pb.Type_BOOL:
 		return "bool", nil
@@ -34,10 +33,10 @@ func GenPrimitiveType(tp *pb.Type_Primitive) (string, error) {
 	return "", fmt.Errorf("unsupported type primitive %s", tp.String())
 }
 
-// GenSimpleType returns Golang type string for non-composite types (no lists and sets)
-func GenSimpleType(t *pb.Type) (string, error) {
+// GetSimpleType returns Golang type string for non-composite types (no lists and sets)
+func GetSimpleType(t *pb.Type) (string, error) {
 	if pType := t.GetPrimitive(); pType != pb.Type_NO_Primitive {
-		return GenPrimitiveType(&pType)
+		return GetPrimitiveType(&pType)
 	}
 	if t.GetTypeRef() != nil {
 		path := t.GetTypeRef().GetRef().GetPath()
@@ -124,25 +123,25 @@ func GetJSONProperty(name string, t *pb.Type, sep string) string {
 	return strings.Join(SplitUppercase(name), sep)
 }
 
-// GenType creates golang type for given sysl type
-func GenType(t *pb.Type) (string, *pb.Type, error) {
+// GetType creates golang type for given sysl type
+func GetType(t *pb.Type) (string, *pb.Type, error) {
 	var err error
 	var typeStr string
 	if t.GetPrimitive() != pb.Type_NO_Primitive || t.GetTypeRef() != nil {
 		// Primitive type, reference or map
-		if typeStr, err = GenSimpleType(t); err == nil {
+		if typeStr, err = GetSimpleType(t); err == nil {
 			return typeStr, t, nil
 		}
 	} else if t.GetList() != nil {
 		// List
 		t = t.GetList().GetType()
-		if typeStr, err = GenSimpleType(t); err == nil {
+		if typeStr, err = GetSimpleType(t); err == nil {
 			return fmt.Sprintf("[]%s", typeStr), t, nil
 		}
 	} else if t.GetSet() != nil {
 		// Set
 		t = t.GetSet()
-		if typeStr, err = GenSimpleType(t); err == nil {
+		if typeStr, err = GetSimpleType(t); err == nil {
 			return fmt.Sprintf("map[%s]interface{}", typeStr), t, nil
 		}
 	}
@@ -152,56 +151,50 @@ func GenType(t *pb.Type) (string, *pb.Type, error) {
 	return "", nil, fmt.Errorf("unknown type %s", t.String())
 }
 
-// GenStructField creates a single line inside a struct definition
-func GenStructField(fieldName string, fieldType *pb.Type, sep string) (string, error) {
-	fieldTypeStr, subType, err := GenType(fieldType)
+// WriteStructField creates a single line inside a struct definition
+func WriteStructField(w io.Writer, fName string, fType *pb.Type, sep string) error {
+	fTypeStr, subType, err := GetType(fType)
 	if err != nil {
-		return "", err
+		return err
 	}
-	jsonProp := GetJSONProperty(fieldName, subType, sep)
-	structField := fmt.Sprintf("%s %s `json:\"%s\"`\n", fieldName, fieldTypeStr, jsonProp)
-	return structField, nil
+	jsonProp := GetJSONProperty(fName, subType, sep)
+	fmt.Fprintf(w, "%s %s `json:\"%s\"`\n", fName, fTypeStr, jsonProp)
+	return nil
 }
 
-//GenStruct creates a Golang `struct` type definition from a Sysl Tuple type definition
-func GenStruct(name string, t *pb.Type, jsonSep string) (string, error) {
+// WriteStruct creates a Golang `struct` type definition from a Sysl Tuple type definition
+func WriteStruct(w io.Writer, name string, t *pb.Type, jsonSep string) error {
 	if t.GetTuple() == nil {
-		return "", fmt.Errorf("top level type has to be Tuple")
+		return fmt.Errorf("top level type has to be Tuple")
 	}
-	var buffer bytes.Buffer
 	if attr, ok := t.Attrs["doc"]; ok {
-		buffer.WriteString(fmt.Sprintf("// %s\n", attr.GetS()))
+		fmt.Fprintf(w, "// %s\n", attr.GetS())
 	}
-	buffer.WriteString(fmt.Sprintf("type %s struct{\n", name))
+	fmt.Fprintf(w, "type %s struct{\n", name)
 	attrDefs := t.GetTuple().GetAttrDefs()
 
 	names, err := NamesSortedBySourceContext(attrDefs)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	for _, fieldName := range names {
-		var structField string
-		structField, err = GenStructField(fieldName, attrDefs[fieldName], jsonSep)
-		if err != nil {
-			return "", err
+		if err = WriteStructField(w, fieldName, attrDefs[fieldName], jsonSep); err != nil {
+			return err
 		}
-		buffer.WriteString(structField)
 	}
-	buffer.WriteString("}\n")
-	b, err := format.Source(buffer.Bytes())
-	return string(b), err
+	fmt.Fprintln(w, "}")
+	return nil
 }
 
-// GenTypes creates all types definition in SourceContext order for given Sysl
+// WriteTypes creates all types definition in SourceContext order for given Sysl
 // type definition
-func GenTypes(app *pb.Application) (string, error) {
+func WriteTypes(w io.Writer, app *pb.Application) error {
 	types := app.GetTypes()
 	names, err := NamesSortedBySourceContext(types)
 	if err != nil {
-		return "", err
+		return err
 	}
-	var buffer bytes.Buffer
 	var jsonSep string
 	if attr, ok := app.Attrs["json_property_separator"]; ok {
 		jsonSep = attr.GetS()
@@ -209,11 +202,9 @@ func GenTypes(app *pb.Application) (string, error) {
 
 	for _, name := range names {
 		t := types[name]
-		str, err := GenStruct(name, t, jsonSep)
-		if err != nil {
-			return "", err
+		if err := WriteStruct(w, name, t, jsonSep); err != nil {
+			return err
 		}
-		buffer.WriteString(str)
 	}
-	return buffer.String(), nil
+	return nil
 }

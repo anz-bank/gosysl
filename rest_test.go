@@ -26,11 +26,8 @@ func TestRestCornerCases(tt *testing.T) {
 	app := &pb.Application{
 		Endpoints: map[string]*pb.Endpoint{"ep": ep},
 	}
-	_, err := GenMiddleware(app, []string{"ep"})
-	assert.Error(err)
-
 	module := &pb.Module{Apps: map[string]*pb.Application{"app": app}}
-	_, err = Generate(module, "pkg")
+	_, err := Generate(module, "pkg")
 	assert.Error(err)
 
 	_, err = genMiddlewareFile(&pb.Application{}, nil, "BAD PACKAGE")

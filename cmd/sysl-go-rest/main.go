@@ -43,11 +43,11 @@ func main() {
 	}
 
 	s := reflect.ValueOf(&result).Elem()
-	for i := 0; i < s.NumField(); i++ {
-		content := s.Field(i).Interface().(string)
+	for i, n := 0, s.NumField(); i < n; i++ {
+		content := s.Field(i).Interface().([]byte)
 		basename := strings.ToLower(s.Type().Field(i).Name)
 		filename := filepath.Join(outDir, basename+".go")
-		err = ioutil.WriteFile(filename, []byte(content), 0644)
+		err = ioutil.WriteFile(filename, content, 0644)
 		if err != nil {
 			log.Fatal("Cannot write file ", filename)
 		}

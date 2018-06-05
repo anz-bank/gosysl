@@ -1,5 +1,5 @@
-ù<
-RestApië<
+ ;
+RestApiæ;
 	
 RestApi"
 	interface"Storer"R
@@ -40,8 +40,8 @@ middleware"AuthorizeDataSet:
 
 returnBH/api/{key}/{startTime}
 	startTime	ö 
-key	ö *˜
-GET /api/{key}/nameﬂ
+key	ö *æ
+GET /api/{key}/name¶
 GET /api/{key}/name"
 method_name"GetDataSetName"
 patterns
@@ -49,12 +49,8 @@ middleware"AuthorizeDataSet:
 "rest" 
 
 middleware"AuthorizeDataSet:B	
-KeyNameB`/api/{key}/name
-key	ö 7
-time-J$
-
-	
-RestApi{queryTime<:string}ö *Ä
+KeyNameB'/api/{key}/name
+key	ö *Ä
 POST /api/admin/{key}/subscribe‹
 POST /api/admin/{key}/subscribe" 
 method_name"PutSubscription"
@@ -228,17 +224,16 @@ B
 key	ö  J
 spJ
 
-SchemaPayload*É
-!POST /api/admin/{key}/unsubscribe›
+SchemaPayload*â
+!POST /api/admin/{key}/unsubscribe„
 !POST /api/admin/{key}/unsubscribe"#
 method_name"DeleteSubscription"
 patterns
 :
 "rest"
 
-middleware"AuthorizeAdmin:
-
-returnB4/api/admin/{key}/unsubscribe
+middleware"AuthorizeAdmin:B
+SubscriptionB4/api/admin/{key}/unsubscribe
 key	ö6 J
 sJ
 
@@ -314,13 +309,11 @@ start-timeöf
 
 JSONSchemaB
 json"schemaögBR
-docK"IDataSetPayload is JSON payload on REST API request to create new data set2¢
-TimesòF
-+
-Data#"!
-B
-json"
-data-timesöY
+docK"IDataSetPayload is JSON payload on REST API request to create new data set2å
+TimesÇ0
+
+Data"
+	öY
 
 Schema"
 	öZBN
@@ -360,27 +353,27 @@ data-timesöY
 DataPayload^
 
 Data	ömBG
-doc@">DataPayload is JSON payload on REST API request to update data2ù
-Subscriptionå<
+doc@">DataPayload is JSON payload on REST API request to update data2ú
+Subscriptionã;
 
 URLB
 json"urlöD
-
-SecreteToken	öEBL
+
+SecretToken	öEBL
 docE"CSubscription holds external endpoint values for change notification2±
 Data®Z
 
 CreationTime	ö<
 %
-JSONDataB
+JSONDataB
 json"dataö;
 
 	StartTime	ö:BJ
-docC"AData holds JSON data valid from StartTime created at CreationTime2≥
-CreationTimes°ø
-i
-DataaB
-json"data-time-mapJ?
+docC"AData holds JSON data valid from StartTime created at CreationTime2™
+CreationTimesò∂
+`
+DataXB
+json"dataJ?
 
 	
 RestApiCreationTimes!map of string:CreationStartTimeöa
@@ -395,7 +388,7 @@ R
 CreationTime	öA
 )
 
-JSONSchemaB
+JSONSchemaB
 json"schemaö@
 
 	StartTime	ö?BT

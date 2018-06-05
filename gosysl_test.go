@@ -1,6 +1,7 @@
 package gosysl
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -18,9 +19,10 @@ func TestEnd2End(tt *testing.T) {
 	assert.NoError(err)
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
-	assert.Equal(expectedInterface, result.Interface)
-	assert.Equal(expectedMiddleware, result.Middleware)
-	assert.Equal(expectedRest, result.Rest)
+	assert.Equal(expectedStorer, string(result.Storer))
+	//fmt.Println(string(result.Storer))
+	assert.Equal(expectedMiddleware, string(result.Middleware))
+	assert.Equal(expectedRest, string(result.Rest))
 
 	// failing gofmt
 	_, err = Generate(module, "BAD PACKAGE NAME")
@@ -32,6 +34,7 @@ func TestGetPackage(tt *testing.T) {
 
 	assert.Equal("x", GetPackage("x"))
 	assert.Equal("y", GetPackage("x/y"))
+	assert.Equal("y", GetPackage("x/y/"))
 }
 
 func TestGetApp(tt *testing.T) {
@@ -45,7 +48,7 @@ func TestGetApp(tt *testing.T) {
 	assert.Error(err)
 }
 
-var expectedInterface = autoGenPrefix + `package mypkg
+var expectedStorer = fmt.Sprintf(autoGenPrefix, `mypkg`) + `package mypkg
 
 // Storer abstracts all required RefData persistence and retrieval
 type Storer interface {
@@ -53,22 +56,22 @@ type Storer interface {
 	// DataSet
 	GetKeys() (Keys, error)
 	CreateDataSet(ds DataSetPayload) (Key, error)
-	GetDataSetName(key string, queryTime string) (KeyName, error)
+	GetDataSetName(key string) (KeyName, error)
 	PutDataSetName(key string, np NamePayload) (KeyName, error)
 
 	// Data
 	GetData(key string, queryTime string) (Data, error)
 	PutData(key string, dp DataPayload) (Data, error)
-	GetDataWithStart(startTime string, key string) (Data, error)
-	PutDataWithStart(startTime string, key string, dp DataPayload) (Data, error)
-	DeleteData(startTime string, key string) error
+	GetDataWithStart(key string, startTime string) (Data, error)
+	PutDataWithStart(key string, startTime string, dp DataPayload) (Data, error)
+	DeleteData(key string, startTime string) error
 
 	// Schema
 	GetSchema(key string, queryTime string) (Schema, error)
 	PutSchema(key string, sp SchemaPayload) (Schema, error)
-	GetSchemaWithStart(startTime string, key string) (Schema, error)
-	PutSchemaWithStart(startTime string, key string, sp SchemaPayload) (Schema, error)
-	DeleteSchema(startTime string, key string) error
+	GetSchemaWithStart(key string, startTime string) (Schema, error)
+	PutSchemaWithStart(key string, startTime string, sp SchemaPayload) (Schema, error)
+	DeleteSchema(key string, startTime string) error
 
 	// Admin
 	DeleteDataSet(key string) error
@@ -77,27 +80,27 @@ type Storer interface {
 	GetRestriction(key string) (Restriction, error)
 	PutRestriction(key string, r Restriction) (Restriction, error)
 	PutSubscription(key string, s Subscription) (Subscription, error)
-	DeleteSubscription(key string, s Subscription) error
+	DeleteSubscription(key string, s Subscription) (Subscription, error)
 }
 
 // Data holds JSON data valid from StartTime created at CreationTime
 type Data struct {
-	StartTime    string ` + "`json:\"start-time\"`" + `
-	JSONData     string ` + "`json:\"data\"`" + `
-	CreationTime string ` + "`json:\"creation-time\"`" + `
+	StartTime    string      ` + "`json:\"start-time\"`" + `
+	JSONData     interface{} ` + "`json:\"data\"`" + `
+	CreationTime string      ` + "`json:\"creation-time\"`" + `
 }
 
 // Schema holds JSON Schema to validate Data against, a name for key creation.
 type Schema struct {
-	StartTime    string ` + "`json:\"start-time\"`" + `
-	JSONSchema   string ` + "`json:\"schema\"`" + `
-	CreationTime string ` + "`json:\"creation-time\"`" + `
+	StartTime    string      ` + "`json:\"start-time\"`" + `
+	JSONSchema   interface{} ` + "`json:\"schema\"`" + `
+	CreationTime string      ` + "`json:\"creation-time\"`" + `
 }
 
 // Subscription holds external endpoint values for change notification
 type Subscription struct {
-	URL          string ` + "`json:\"url\"`" + `
-	SecreteToken string ` + "`json:\"secrete-token\"`" + `
+	URL         string ` + "`json:\"url\"`" + `
+	SecretToken string ` + "`json:\"secret-token\"`" + `
 }
 
 // Restriction contains scope access restriction and frozen times for schema and data.
@@ -127,7 +130,7 @@ type KeyName struct {
 
 // Times contains schema and data times, used to get StartTimes for both
 type Times struct {
-	Data   []string ` + "`json:\"data-times\"`" + `
+	Data   []string ` + "`json:\"data\"`" + `
 	Schema []string ` + "`json:\"schema\"`" + `
 }
 
@@ -139,7 +142,7 @@ type CreationStartTime struct {
 
 // CreationTimes contains schema and data times maps, used to StartTime to CreationTims
 type CreationTimes struct {
-	Data   map[string]CreationStartTime ` + "`json:\"data-time-map\"`" + `
+	Data   map[string]CreationStartTime ` + "`json:\"data\"`" + `
 	Schema map[string]CreationStartTime ` + "`json:\"schema\"`" + `
 }
 
@@ -175,18 +178,21 @@ type UpdateEvent struct {
 }
 `
 
-var expectedMiddleware = autoGenPrefix + `package mypkg
+var expectedMiddleware = fmt.Sprintf(autoGenPrefix, `mypkg`) + `package mypkg
 
 import "net/http"
 
+// Middleware holds the middleware accessor methods for the REST API
 type Middleware interface {
 	AuthorizeRoot() []func(next http.Handler) http.Handler
 	AuthorizeDataSet() []func(next http.Handler) http.Handler
 	AuthorizeAdmin() []func(next http.Handler) http.Handler
+	Root() []func(next http.Handler) http.Handler
 }
 `
 
-var expectedRest = autoGenPrefix + "package mypkg\n\n" + restPrefix + `
+var expectedRest = fmt.Sprintf(autoGenPrefix, `mypkg`) + "package mypkg\n\n" +
+	restPrefix + `
 // Keys for Context lookup
 const (
 	KeyKey ContextKeyType = iota
@@ -217,8 +223,8 @@ func NewRestHandler(s Storer, m Middleware) RestHandler {
 		r.Put("/", rh.handlePutData)
 	})
 	r.Route("/api/{key}/{startTime}", func(r chi.Router) {
-		r.Use(makeContextSaver(StartTimeKey, "startTime"))
 		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(makeContextSaver(StartTimeKey, "startTime"))
 		r.Use(m.AuthorizeDataSet()...)
 		r.Get("/", rh.handleGetDataWithStart)
 		r.Put("/", rh.handlePutDataWithStart)
@@ -231,8 +237,8 @@ func NewRestHandler(s Storer, m Middleware) RestHandler {
 		r.Put("/", rh.handlePutSchema)
 	})
 	r.Route("/api/{key}/schema/{startTime}", func(r chi.Router) {
-		r.Use(makeContextSaver(StartTimeKey, "startTime"))
 		r.Use(makeContextSaver(KeyKey, "key"))
+		r.Use(makeContextSaver(StartTimeKey, "startTime"))
 		r.Use(m.AuthorizeDataSet()...)
 		r.Get("/", rh.handleGetSchemaWithStart)
 		r.Put("/", rh.handlePutSchemaWithStart)
@@ -299,8 +305,7 @@ func (rh *RestHandler) handleCreateDataSet(w http.ResponseWriter, r *http.Reques
 
 func (rh *RestHandler) handleGetDataSetName(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
-	result, err := rh.storer.GetDataSetName(key, time)
+	result, err := rh.storer.GetDataSetName(key)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -310,14 +315,13 @@ func (rh *RestHandler) handleGetDataSetName(w http.ResponseWriter, r *http.Reque
 
 func (rh *RestHandler) handlePutDataSetName(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
 	var payload NamePayload
 	if err := decodeJSON(r.Body, &payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, err := rh.storer.PutDataSetName(key, time, payload)
+	result, err := rh.storer.PutDataSetName(key, payload)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -327,7 +331,7 @@ func (rh *RestHandler) handlePutDataSetName(w http.ResponseWriter, r *http.Reque
 
 func (rh *RestHandler) handleGetData(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
+	time := r.URL.Query().Get("time")
 	result, err := rh.storer.GetData(key, time)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
@@ -338,14 +342,13 @@ func (rh *RestHandler) handleGetData(w http.ResponseWriter, r *http.Request) {
 
 func (rh *RestHandler) handlePutData(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
 	var payload DataPayload
 	if err := decodeJSON(r.Body, &payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, err := rh.storer.PutData(key, time, payload)
+	result, err := rh.storer.PutData(key, payload)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -354,9 +357,9 @@ func (rh *RestHandler) handlePutData(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rh *RestHandler) handleGetDataWithStart(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
-	result, err := rh.storer.GetDataWithStart(startTime, key)
+	startTime := r.Context().Value(StartTimeKey).(string)
+	result, err := rh.storer.GetDataWithStart(key, startTime)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -365,15 +368,15 @@ func (rh *RestHandler) handleGetDataWithStart(w http.ResponseWriter, r *http.Req
 }
 
 func (rh *RestHandler) handlePutDataWithStart(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
+	startTime := r.Context().Value(StartTimeKey).(string)
 	var payload DataPayload
 	if err := decodeJSON(r.Body, &payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, err := rh.storer.PutDataWithStart(startTime, key, payload)
+	result, err := rh.storer.PutDataWithStart(key, startTime, payload)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -382,9 +385,9 @@ func (rh *RestHandler) handlePutDataWithStart(w http.ResponseWriter, r *http.Req
 }
 
 func (rh *RestHandler) handleDeleteData(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
-	if err := rh.storer.DeleteData(startTime, key); err != nil {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	if err := rh.storer.DeleteData(key, startTime); err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
 	}
@@ -393,7 +396,7 @@ func (rh *RestHandler) handleDeleteData(w http.ResponseWriter, r *http.Request) 
 
 func (rh *RestHandler) handleGetSchema(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
+	time := r.URL.Query().Get("time")
 	result, err := rh.storer.GetSchema(key, time)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
@@ -404,14 +407,13 @@ func (rh *RestHandler) handleGetSchema(w http.ResponseWriter, r *http.Request) {
 
 func (rh *RestHandler) handlePutSchema(w http.ResponseWriter, r *http.Request) {
 	key := r.Context().Value(KeyKey).(string)
-	queryTime := r.URL.Query().Get("time")
 	var payload SchemaPayload
 	if err := decodeJSON(r.Body, &payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, err := rh.storer.PutSchema(key, time, payload)
+	result, err := rh.storer.PutSchema(key, payload)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -420,9 +422,9 @@ func (rh *RestHandler) handlePutSchema(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rh *RestHandler) handleGetSchemaWithStart(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
-	result, err := rh.storer.GetSchemaWithStart(startTime, key)
+	startTime := r.Context().Value(StartTimeKey).(string)
+	result, err := rh.storer.GetSchemaWithStart(key, startTime)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -431,15 +433,15 @@ func (rh *RestHandler) handleGetSchemaWithStart(w http.ResponseWriter, r *http.R
 }
 
 func (rh *RestHandler) handlePutSchemaWithStart(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
+	startTime := r.Context().Value(StartTimeKey).(string)
 	var payload SchemaPayload
 	if err := decodeJSON(r.Body, &payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, err := rh.storer.PutSchemaWithStart(startTime, key, payload)
+	result, err := rh.storer.PutSchemaWithStart(key, startTime, payload)
 	if err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -448,9 +450,9 @@ func (rh *RestHandler) handlePutSchemaWithStart(w http.ResponseWriter, r *http.R
 }
 
 func (rh *RestHandler) handleDeleteSchema(w http.ResponseWriter, r *http.Request) {
-	startTime := r.Context().Value(StartTimeKey).(string)
 	key := r.Context().Value(KeyKey).(string)
-	if err := rh.storer.DeleteSchema(startTime, key); err != nil {
+	startTime := r.Context().Value(StartTimeKey).(string)
+	if err := rh.storer.DeleteSchema(key, startTime); err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
 	}

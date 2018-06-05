@@ -511,27 +511,6 @@ apps {
             }
             loc: true
           }
-          query_param {
-            name: "time"
-            type {
-              type_ref {
-                context {
-                  appname {
-                    part: "RestApi"
-                  }
-                }
-                ref {
-                  path: "{queryTime<:string}"
-                }
-              }
-              source_context {
-                start {
-                  line: 8
-                }
-              }
-            }
-            loc: true
-          }
         }
       }
     }
@@ -870,8 +849,8 @@ apps {
           }
         }
         stmt {
-          action {
-            action: "return"
+          ret {
+            payload: "Subscription"
           }
         }
         rest_params {
@@ -1339,7 +1318,7 @@ apps {
               attrs {
                 key: "json"
                 value {
-                  s: "data-time-map"
+                  s: "data"
                 }
               }
               type_ref {
@@ -1408,7 +1387,7 @@ apps {
           attr_defs {
             key: "JSONData"
             value {
-              primitive: STRING
+              primitive: ANY
               attrs {
                 key: "json"
                 value {
@@ -1733,7 +1712,7 @@ apps {
           attr_defs {
             key: "JSONSchema"
             value {
-              primitive: STRING
+              primitive: ANY
               attrs {
                 key: "json"
                 value {
@@ -1796,7 +1775,7 @@ apps {
       value {
         tuple {
           attr_defs {
-            key: "SecreteToken"
+            key: "SecretToken"
             value {
               primitive: STRING
               source_context {
@@ -1842,12 +1821,6 @@ apps {
               list {
                 type {
                   primitive: STRING
-                  attrs {
-                    key: "json"
-                    value {
-                      s: "data-times"
-                    }
-                  }
                   source_context {
                     start {
                       line: 89

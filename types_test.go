@@ -1,6 +1,7 @@
 package gosysl
 
 import (
+	"bytes"
 	"go/format"
 	"testing"
 
@@ -29,32 +30,32 @@ var primitiveErrTests = []pb.Type_Primitive{
 	pb.Type_UUID,
 }
 
-func TestGenPrimitiveType(tt *testing.T) {
+func TestGetPrimitiveType(tt *testing.T) {
 	assert := testifyAssert.New(tt)
 	for _, t := range primitiveTests {
-		str, err := GenPrimitiveType(&t.input)
+		str, err := GetPrimitiveType(&t.input)
 		assert.NoError(err)
 		assert.Equal(t.expected, str)
 	}
 	for _, tp := range primitiveErrTests {
-		_, err := GenPrimitiveType(&tp)
+		_, err := GetPrimitiveType(&tp)
 		assert.Error(err)
 	}
 }
 
-func TestGenSimpleType(tt *testing.T) {
+func TestGetSimpleType(tt *testing.T) {
 	assert := testifyAssert.New(tt)
 	for _, t := range primitiveTests {
 		primitive := &pb.Type_Primitive_{Primitive: t.input}
 		pt := &pb.Type{Type: primitive}
-		str, err := GenSimpleType(pt)
+		str, err := GetSimpleType(pt)
 		assert.NoError(err)
 		assert.Equal(t.expected, str)
 	}
 	for _, tp := range primitiveErrTests {
 		primitive := &pb.Type_Primitive_{Primitive: tp}
 		pt := &pb.Type{Type: primitive}
-		_, err := GenSimpleType(pt)
+		_, err := GetSimpleType(pt)
 		assert.Error(err)
 	}
 
@@ -71,7 +72,7 @@ func TestGenSimpleType(tt *testing.T) {
 		ref := &pb.Scope{Path: []string{t.input}}
 		typeRef := &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}}
 		pt := &pb.Type{Type: typeRef}
-		str, err := GenSimpleType(pt)
+		str, err := GetSimpleType(pt)
 		assert.NoError(err)
 		assert.Equal(t.expected, str)
 	}
@@ -83,14 +84,14 @@ func TestGenSimpleType(tt *testing.T) {
 		ref := &pb.Scope{Path: t}
 		typeRef := &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}}
 		pt := &pb.Type{Type: typeRef}
-		_, err := GenSimpleType(pt)
+		_, err := GetSimpleType(pt)
 		assert.Error(err)
 	}
 
 	strType := &pb.Type_Primitive_{Primitive: pb.Type_STRING}
 	list := &pb.Type_List_{List: &pb.Type_List{Type: &pb.Type{Type: strType}}}
 	pt := &pb.Type{Type: list}
-	_, err := GenSimpleType(pt)
+	_, err := GetSimpleType(pt)
 	assert.Error(err)
 }
 
@@ -104,7 +105,7 @@ func TestSplitUppercase(tt *testing.T) {
 	assert.Equal([]string{"a", "b", "c"}, SplitUppercase("aBC"))
 }
 
-func TestGenStruct(tt *testing.T) {
+func TestWriteStruct(tt *testing.T) {
 	assert := testifyAssert.New(tt)
 
 	attrDefs := map[string]*pb.Type{}
@@ -116,41 +117,48 @@ func TestGenStruct(tt *testing.T) {
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 1}},
 	}
 
-	str, err := GenStruct("DataPayload", ttype, "")
-	assert.NoError(err)
+	w := &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "DataPayload", ttype, ""))
 	expectedSrc := `type DataPayload struct {
 			Data interface{} ` + "`json:\"Data\"`" + `
 		}` + "\n"
 	expected, _ := format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err := format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 
 	attrDefs["LastName"] = &pb.Type{
 		Type:          &pb.Type_Primitive_{Primitive: pb.Type_STRING},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 2}},
 	}
-	str, err = GenStruct("DataPayload", ttype, "-")
-	assert.NoError(err)
+
+	w = &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "DataPayload", ttype, "-"))
 	expectedSrc = `type DataPayload struct {
 			Data interface{} ` + "`json:\"data\"`" + `
 			LastName string  ` + "`json:\"last-name\"`" + `
 		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err = format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 
 	ref := &pb.Scope{Path: []string{"MyType"}}
 	attrDefs["MyField"] = &pb.Type{
 		Type:          &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 3}},
 	}
-	str, err = GenStruct("DataPayload", ttype, "__")
-	assert.NoError(err)
+	w = &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "DataPayload", ttype, "__"))
 	expectedSrc = `type DataPayload struct {
 			Data interface{} ` + "`json:\"data\"`" + `
 			LastName string  ` + "`json:\"last__name\"`" + `
 			MyField MyType   ` + "`json:\"my__field\"`" + `
 		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err = format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 
 	strType := &pb.Type{
 		Type:          &pb.Type_Primitive_{Primitive: pb.Type_STRING},
@@ -160,8 +168,8 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["StringList"] = &pb.Type{
 		Type: typeList,
 	}
-	str, err = GenStruct("DataPayload", ttype, "")
-	assert.NoError(err)
+	w = &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "DataPayload", ttype, ""))
 	expectedSrc = `type DataPayload struct {
 			Data interface{}   ` + "`json:\"Data\"`" + `
 			LastName string    ` + "`json:\"LastName\"`" + `
@@ -169,7 +177,9 @@ func TestGenStruct(tt *testing.T) {
 			StringList []string` + "`json:\"StringList\"`" + `
 		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err = format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 
 	refType := &pb.Type{
 		Type:          &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}},
@@ -179,8 +189,8 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["MyList"] = &pb.Type{
 		Type: typeList,
 	}
-	str, err = GenStruct("DataPayload", ttype, "-")
-	assert.NoError(err)
+	w = &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "DataPayload", ttype, "-"))
 	expectedSrc = `type DataPayload struct {
 			Data interface{}   ` + "`json:\"data\"`" + `
 			LastName string    ` + "`json:\"last-name\"`" + `
@@ -189,7 +199,9 @@ func TestGenStruct(tt *testing.T) {
 			StringList []string` + "`json:\"string-list\"`" + `
 		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err = format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 
 	strType2 := &pb.Type{
 		Type:          &pb.Type_Primitive_{Primitive: pb.Type_STRING},
@@ -198,8 +210,8 @@ func TestGenStruct(tt *testing.T) {
 	attrDefs["StringSet"] = &pb.Type{
 		Type: &pb.Type_Set{Set: strType2},
 	}
-	str, err = GenStruct("YYY", ttype, "")
-	assert.NoError(err)
+	w = &bytes.Buffer{}
+	assert.NoError(WriteStruct(w, "YYY", ttype, ""))
 	expectedSrc = `type YYY struct {
 			Data interface{}                 ` + "`json:\"Data\"`" + `
 			LastName string                  ` + "`json:\"LastName\"`" + `
@@ -209,7 +221,9 @@ func TestGenStruct(tt *testing.T) {
 			StringList []string              ` + "`json:\"StringList\"`" + `
 		}` + "\n"
 	expected, _ = format.Source([]byte(expectedSrc))
-	assert.Equal(string(expected), str)
+	actual, err = format.Source(w.Bytes())
+	assert.NoError(err)
+	assert.Equal(string(expected), string(actual))
 }
 
 func TestGentypesCornerCases(tt *testing.T) {
@@ -225,37 +239,32 @@ func TestGentypesCornerCases(tt *testing.T) {
 	types := map[string]*pb.Type{"x": {}}
 	_, err = NamesSortedBySourceContext(types)
 	assert.Error(err)
-	_, err = GenTypes(&pb.Application{Types: types})
-	assert.Error(err)
+	w := &bytes.Buffer{}
+	assert.Error(WriteTypes(w, &pb.Application{Types: types}))
 	module.Apps = map[string]*pb.Application{"x": {Types: types}}
 	_, err = Generate(module, "")
 	assert.Error(err)
 
-	_, err = GenStruct("x", &pb.Type{}, "-")
-	assert.Error(err)
+	assert.Error(WriteStruct(w, "x", &pb.Type{}, "-"))
 
 	attrDefs := map[string]*pb.Type{}
 	typeTuple := &pb.Type_Tuple_{Tuple: &pb.Type_Tuple{AttrDefs: attrDefs}}
 	ttype := &pb.Type{Type: typeTuple}
 	attrDefs["Data"] = &pb.Type{}
-	_, err = GenStruct("DataPayload", ttype, "")
-	assert.Error(err)
+	assert.Error(WriteStruct(w, "DataPayload", ttype, ""))
 
 	ref := &pb.Scope{Path: []string{"1", "2"}}
 	attrDefs["Data"] = &pb.Type{
 		Type:          &pb.Type_TypeRef{TypeRef: &pb.ScopedRef{Ref: ref}},
 		SourceContext: &pb.SourceContext{Start: &pb.SourceContext_Location{Line: 3}},
 	}
-	_, err = GenStruct("DataPayload", ttype, "")
-	assert.Error(err)
+	assert.Error(WriteStruct(w, "DataPayload", ttype, ""))
 	types = map[string]*pb.Type{"x": ttype}
-	_, err = GenTypes(&pb.Application{Types: types})
+	assert.Error(WriteTypes(w, &pb.Application{Types: types}))
+
+	_, _, err = GetType(&pb.Type{})
 	assert.Error(err)
 
-	_, _, err = GenType(&pb.Type{})
-	assert.Error(err)
-
-	_, err = GenStructField("", &pb.Type{}, "")
-	assert.Error(err)
+	assert.Error(WriteStructField(w, "", &pb.Type{}, ""))
 
 }

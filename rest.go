@@ -1,9 +1,8 @@
 package gosysl
 
 import (
-	"bytes"
 	"fmt"
-	"go/format"
+	"io"
 	"strings"
 
 	"github.com/anz-bank/gosysl/pb"
@@ -13,7 +12,7 @@ type route struct {
 	methods         map[string]string
 	middleware      string
 	keys            []string
-	queryParams     []string
+	queryParams     map[string][]string
 	postPayloadType string
 	putPayloadType  string
 }
@@ -30,9 +29,9 @@ var validHTTPMethods = map[string]interface{}{
 	"Delete": struct{}{},
 }
 
-// GenMiddleware creates interface returning required middleware functions
+// WriteMiddleware writes interface returning required middleware functions
 // for REST endpoints
-func GenMiddleware(app *pb.Application, epNames []string) (string, error) {
+func WriteMiddleware(w io.Writer, app *pb.Application, epNames []string) {
 	middlewares := make([]string, 0, len(epNames))
 	middlewareSet := make(map[string]interface{}, len(epNames))
 	for _, name := range epNames {
@@ -44,74 +43,56 @@ func GenMiddleware(app *pb.Application, epNames []string) (string, error) {
 		}
 	}
 
-	var buffer bytes.Buffer
-	buffer.WriteString("type Middleware interface {\n")
+	fmt.Fprintln(w, `// Middleware holds the middleware accessor methods for the REST API`)
+	fmt.Fprintln(w, `type Middleware interface {`)
 	for _, m := range middlewares {
-		s := fmt.Sprintf("%s () []func(next http.Handler) http.Handler\n", m)
-		buffer.WriteString(s)
+		fmt.Fprintf(w, "%s() []func(next http.Handler) http.Handler\n", m)
 	}
-	buffer.WriteString("}\n")
-	b, err := format.Source(buffer.Bytes())
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	fmt.Fprintln(w, "Root() []func(next http.Handler) http.Handler")
+	fmt.Fprintln(w, `}`)
 }
 
-// GenRest creates the contextkeys, routes and handlers for actual REST handlers
-func GenRest(app *pb.Application, epNames []string) (string, error) {
-	var buffer bytes.Buffer
-	buffer.WriteString(genContextKeys(app, epNames))
+// WriteRest creates the contextkeys, routes and handlers for actual REST handlers
+func WriteRest(w io.Writer, app *pb.Application, epNames []string) error {
+	writeContextKeys(w, app, epNames)
 	r, err := getRoutes(app, epNames)
 	if err != nil {
-		return "", err
+		return err
 	}
-	buffer.WriteString(genNewRestHandler(r))
-	buffer.WriteString(genHandlers(r))
-	b, err := format.Source(buffer.Bytes())
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	writeNewRestHandler(w, r)
+	writeHandlers(w, r)
+	return nil
 }
 
-func genHandlers(rs routes) string {
-	var buffer bytes.Buffer
+func writeHandlers(w io.Writer, rs routes) {
 	for _, path := range rs.paths {
 		r := rs.content[path]
 		if handler, ok := r.methods["Get"]; ok {
-			buffer.WriteString(genGet(handler, r))
+			writeGet(w, handler, r)
 		}
 		if handler, ok := r.methods["Post"]; ok {
-			buffer.WriteString(genPost(handler, r))
+			writePost(w, handler, r)
 		}
 		if handler, ok := r.methods["Put"]; ok {
-			buffer.WriteString(genPut(handler, r))
+			writePut(w, handler, r)
 		}
 		if handler, ok := r.methods["Delete"]; ok {
-			buffer.WriteString(genDelete(handler, r))
+			writeDelete(w, handler, r)
 		}
 	}
-	return buffer.String()
 }
 
-func getQueryVar(queryParam string) string {
-	return "query" + strings.Title(queryParam)
-}
-
-func getHandlerHead(handler string, keys []string, queryParams []string) string {
-	var buffer bytes.Buffer
-	s := "func (rh *RestHandler) handle%s(w http.ResponseWriter, r *http.Request) {\n"
-	buffer.WriteString(fmt.Sprintf(s, handler))
+func writeHandlerHead(w io.Writer, handler string, keys []string, queryParams []string) {
+	format := "func (rh *RestHandler) handle%s(w http.ResponseWriter, r *http.Request) {\n"
+	fmt.Fprintf(w, format, handler)
 	for _, key := range keys {
-		s = "	%s := r.Context().Value(%s).(string)\n"
-		buffer.WriteString(fmt.Sprintf(s, key, getContextKey(key)))
+		format = "	%s := r.Context().Value(%s).(string)\n"
+		fmt.Fprintf(w, format, key, getContextKey(key))
 	}
 	for _, qp := range queryParams {
-		s = "	%s := r.URL.Query().Get(\"%s\")\n"
-		buffer.WriteString(fmt.Sprintf(s, getQueryVar(qp), qp))
+		format = "	%s := r.URL.Query().Get(\"%s\")\n"
+		fmt.Fprintf(w, format, qp, qp)
 	}
-	return buffer.String()
 }
 
 const errBoiler = `if err != nil {
@@ -119,30 +100,26 @@ const errBoiler = `if err != nil {
 		return
 	}`
 
-func genGet(handler string, r *route) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(getHandlerHead(handler, r.keys, r.queryParams))
-	params := strings.Join(append(r.keys, r.queryParams...), ", ")
+func writeGet(w io.Writer, handler string, r *route) {
+	writeHandlerHead(w, handler, r.keys, r.queryParams["Get"])
+	params := strings.Join(append(r.keys, r.queryParams["Get"]...), ", ")
 	s := `	result, err := rh.storer.%s(%s)
 	%s
 	render.JSON(w, r, result)
 }` + "\n\n"
-	buffer.WriteString(fmt.Sprintf(s, handler, params, errBoiler))
-	return buffer.String()
+	fmt.Fprintf(w, s, handler, params, errBoiler)
 }
 
-func genDelete(handler string, r *route) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(getHandlerHead(handler, r.keys, r.queryParams))
-	params := strings.Join(append(r.keys, r.queryParams...), ", ")
+func writeDelete(w io.Writer, handler string, r *route) {
+	writeHandlerHead(w, handler, r.keys, r.queryParams["Delete"])
+	params := strings.Join(append(r.keys, r.queryParams["Delete"]...), ", ")
 	s := `	if err := rh.storer.%s(%s); err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
 	}
 	render.NoContent(w, r)
 }` + "\n\n"
-	buffer.WriteString(fmt.Sprintf(s, handler, params))
-	return buffer.String()
+	fmt.Fprintf(w, s, handler, params)
 }
 
 const payloadBoiler = `	if err := decodeJSON(r.Body, &payload); err != nil {
@@ -150,81 +127,66 @@ const payloadBoiler = `	if err := decodeJSON(r.Body, &payload); err != nil {
 		return
 	}` + "\n"
 
-func genPutPost(handler string, r *route, post bool) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(getHandlerHead(handler, r.keys, r.queryParams))
-	p := append(r.keys, r.queryParams...)
+func writePut(w io.Writer, handler string, r *route) {
+	writeHandlerHead(w, handler, r.keys, r.queryParams["Put"])
+	p := append(r.keys, r.queryParams["Put"]...)
 	p = append(p, "payload")
 	params := strings.Join(p, ", ")
-	payloadType := r.putPayloadType
-	status := ""
-	if post {
-		payloadType = r.postPayloadType
-		status = "\nrender.Status(r, http.StatusCreated)"
-	}
+	s := `	var payload %s
+	%s
+	result, err := rh.storer.%s(%s)
+	%s
+	render.JSON(w, r, result)
+}` + "\n\n"
+	fmt.Fprintf(w, s, r.putPayloadType, payloadBoiler, handler, params, errBoiler)
+}
+
+func writePost(w io.Writer, handler string, r *route) {
+	writeHandlerHead(w, handler, r.keys, r.queryParams["Post"])
+	p := append(r.keys, r.queryParams["Post"]...)
+	p = append(p, "payload")
+	params := strings.Join(p, ", ")
 
 	s := `	var payload %s
 	%s
 	result, err := rh.storer.%s(%s)
-	%s %s
+	%s
+	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, result)
 }` + "\n\n"
-	str := fmt.Sprintf(s,
-		payloadType,
-		payloadBoiler,
-		handler,
-		params,
-		errBoiler,
-		status)
-	buffer.WriteString(str)
-	return buffer.String()
+	fmt.Fprintf(w, s, r.postPayloadType, payloadBoiler, handler, params, errBoiler)
 }
 
-func genPut(handler string, r *route) string {
-	return genPutPost(handler, r, false)
-}
-
-func genPost(handler string, r *route) string {
-	return genPutPost(handler, r, true)
-}
-
-func genNewRestHandler(r routes) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(`// NewRestHandler creates a new Handler persisting data to Storer.
+func writeNewRestHandler(w io.Writer, r routes) {
+	fmt.Fprint(w, `// NewRestHandler creates a new Handler persisting data to Storer.
 func NewRestHandler(s Storer, m Middleware) RestHandler {
 	r := chi.NewRouter()
 	r.Use(m.Root()...)
-	rh := RestHandler{s, r}` + "\n\n")
-	buffer.WriteString(genRoutes(r))
-	buffer.WriteString(`return rh
-}` + "\n\n")
-	return buffer.String()
+	rh := RestHandler{s, r}`+"\n\n")
+	writeRoutes(w, r)
+	fmt.Fprint(w, "return rh \n} \n\n")
 }
 
-func genRoutes(r routes) string {
-	var buffer bytes.Buffer
+func writeRoutes(w io.Writer, r routes) {
 	for _, path := range r.paths {
-		str := fmt.Sprintf("r.Route(\"%s\", func(r chi.Router) {\n", path)
-		buffer.WriteString(str)
+		fmt.Fprintf(w, `r.Route("%s", func(r chi.Router) {`+"\n", path)
 		for _, key := range r.content[path].keys {
 			ctxKey := getContextKey(key)
-			str = fmt.Sprintf("r.Use(makeContextSaver(%s, \"%s\"))\n", ctxKey, key)
-			buffer.WriteString(str)
+			fmt.Fprintf(w, "r.Use(makeContextSaver(%s, \"%s\"))\n", ctxKey, key)
 		}
 		middleware := r.content[path].middleware
 		if middleware != "" {
-			buffer.WriteString(fmt.Sprintf("r.Use(m.%s()...)\n", middleware))
+			fmt.Fprintf(w, "r.Use(m.%s()...)\n", middleware)
 		}
 		methods := r.content[path].methods
 		for _, m := range []string{"Get", "Post", "Put", "Delete"} {
 			handler, ok := methods[m]
 			if ok {
-				buffer.WriteString(fmt.Sprintf("r.%s(\"/\", rh.handle%s)\n", m, handler))
+				fmt.Fprintf(w, "r.%s(\"/\", rh.handle%s)\n", m, handler)
 			}
 		}
-		buffer.WriteString("})\n")
+		fmt.Fprint(w, "})\n")
 	}
-	return buffer.String()
 }
 
 func getRoutes(app *pb.Application, epNames []string) (routes, error) {
@@ -251,12 +213,13 @@ func getRoutes(app *pb.Application, epNames []string) (routes, error) {
 				methods:     map[string]string{},
 				middleware:  middleware,
 				keys:        getPatternParams(endpoint),
-				queryParams: getQueryParams(endpoint),
+				queryParams: make(map[string][]string, 4),
 			}
 			paths = append(paths, httpPath)
 		}
-		interfaceMethod := GenMethodName(endpoint)
+		interfaceMethod := GetMethodName(endpoint)
 		content[httpPath].methods[httpMethod] = interfaceMethod
+		content[httpPath].queryParams[httpMethod] = getQueryParams(endpoint)
 		if httpMethod == "Put" {
 			t := getPayloadType(endpoint)
 			content[httpPath].putPayloadType = t
@@ -275,20 +238,18 @@ func getPayloadType(ep *pb.Endpoint) string {
 	return ep.Param[0].Type.GetTypeRef().Ref.Appname.Part[0]
 }
 
-func genContextKeys(app *pb.Application, epNames []string) string {
+func writeContextKeys(w io.Writer, app *pb.Application, epNames []string) {
 	keys := getContextKeys(app, epNames)
 	if len(keys) == 0 {
-		return ""
+		return
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString("// Keys for Context lookup\nconst (\n")
-	s := fmt.Sprintf("%s ContextKeyType = iota\n", getContextKey(keys[0]))
-	buffer.WriteString(s)
+	fmt.Fprintln(w, `// Keys for Context lookup`)
+	fmt.Fprintln(w, `const (`)
+	fmt.Fprintf(w, "%s ContextKeyType = iota\n", getContextKey(keys[0]))
 	for i := 1; i < len(keys); i++ {
-		buffer.WriteString(getContextKey(keys[i]) + "\n")
+		fmt.Fprintln(w, getContextKey(keys[i]))
 	}
-	buffer.WriteString(")\n")
-	return buffer.String()
+	fmt.Fprintln(w, ")")
 }
 
 func getContextKey(param string) string {
@@ -296,30 +257,33 @@ func getContextKey(param string) string {
 }
 
 func getPatternParams(ep *pb.Endpoint) []string {
-	return getParams(ep, false)
-}
-
-func getQueryParams(ep *pb.Endpoint) []string {
-	return getParams(ep, true)
-}
-
-func getParams(ep *pb.Endpoint, queryType bool) []string {
 	if ep == nil || ep.RestParams == nil {
 		return nil
 	}
 	result := make([]string, 0, len(ep.RestParams.QueryParam))
 	for _, qp := range ep.RestParams.QueryParam {
-		if (queryType && qp.Type.GetTypeRef() != nil) ||
-			(!queryType && qp.Type.GetTypeRef() == nil) {
+		if qp.Type.GetTypeRef() == nil {
+			result = append([]string{qp.Name}, result...)
+		}
+	}
+	return result
+}
+
+func getQueryParams(ep *pb.Endpoint) []string {
+	if ep == nil || ep.RestParams == nil {
+		return nil
+	}
+	result := make([]string, 0, len(ep.RestParams.QueryParam))
+	for _, qp := range ep.RestParams.QueryParam {
+		if qp.Type.GetTypeRef() != nil {
 			result = append(result, qp.Name)
 		}
 	}
 	return result
-
 }
 
 func getContextKeys(app *pb.Application, epNames []string) []string {
-	set := make(map[string]interface{}, len(epNames))
+	set := make(map[string]struct{}, len(epNames))
 	result := make([]string, 0, len(epNames))
 	for _, name := range epNames {
 		for _, qp := range getPatternParams(app.Endpoints[name]) {
