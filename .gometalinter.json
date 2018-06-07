@@ -45,5 +45,6 @@
           	"Pattern": "^(?P<path>.*?\\.go),(?P<line>\\d+),(?P<message>[^,]+,[^,]+,[^,]+,\".*\")"
         }
    },
- "LineLength" : 90
+ "LineLength" : 90,
+ "Deadline": "100s"
 }
