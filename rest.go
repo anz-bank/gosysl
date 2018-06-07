@@ -67,16 +67,16 @@ func WriteRest(w io.Writer, app *pb.Application, epNames []string) error {
 func writeHandlers(w io.Writer, rs routes) {
 	for _, path := range rs.paths {
 		r := rs.content[path]
-		if handler, ok := r.methods["Get"]; ok {
+		if handler, ok := r.methods["GET"]; ok {
 			writeGet(w, handler, r)
 		}
-		if handler, ok := r.methods["Post"]; ok {
+		if handler, ok := r.methods["POST"]; ok {
 			writePost(w, handler, r)
 		}
-		if handler, ok := r.methods["Put"]; ok {
+		if handler, ok := r.methods["PUT"]; ok {
 			writePut(w, handler, r)
 		}
-		if handler, ok := r.methods["Delete"]; ok {
+		if handler, ok := r.methods["DELETE"]; ok {
 			writeDelete(w, handler, r)
 		}
 	}
@@ -101,8 +101,8 @@ const errBoiler = `if err != nil {
 	}`
 
 func writeGet(w io.Writer, handler string, r *route) {
-	writeHandlerHead(w, handler, r.keys, r.queryParams["Get"])
-	params := strings.Join(append(r.keys, r.queryParams["Get"]...), ", ")
+	writeHandlerHead(w, handler, r.keys, r.queryParams["GET"])
+	params := strings.Join(append(r.keys, r.queryParams["GET"]...), ", ")
 	s := `	result, err := rh.storer.%s(%s)
 	%s
 	render.JSON(w, r, result)
@@ -111,8 +111,8 @@ func writeGet(w io.Writer, handler string, r *route) {
 }
 
 func writeDelete(w io.Writer, handler string, r *route) {
-	writeHandlerHead(w, handler, r.keys, r.queryParams["Delete"])
-	params := strings.Join(append(r.keys, r.queryParams["Delete"]...), ", ")
+	writeHandlerHead(w, handler, r.keys, r.queryParams["DELETE"])
+	params := strings.Join(append(r.keys, r.queryParams["DELETE"]...), ", ")
 	s := `	if err := rh.storer.%s(%s); err != nil {
 		http.Error(w, err.Error(), getStatus(err))
 		return
@@ -128,8 +128,8 @@ const payloadBoiler = `	if err := decodeJSON(r.Body, &payload); err != nil {
 	}` + "\n"
 
 func writePut(w io.Writer, handler string, r *route) {
-	writeHandlerHead(w, handler, r.keys, r.queryParams["Put"])
-	p := append(r.keys, r.queryParams["Put"]...)
+	writeHandlerHead(w, handler, r.keys, r.queryParams["PUT"])
+	p := append(r.keys, r.queryParams["PUT"]...)
 	p = append(p, "payload")
 	params := strings.Join(p, ", ")
 	s := `	var payload %s
@@ -142,8 +142,8 @@ func writePut(w io.Writer, handler string, r *route) {
 }
 
 func writePost(w io.Writer, handler string, r *route) {
-	writeHandlerHead(w, handler, r.keys, r.queryParams["Post"])
-	p := append(r.keys, r.queryParams["Post"]...)
+	writeHandlerHead(w, handler, r.keys, r.queryParams["POST"])
+	p := append(r.keys, r.queryParams["POST"]...)
 	p = append(p, "payload")
 	params := strings.Join(p, ", ")
 
@@ -179,10 +179,11 @@ func writeRoutes(w io.Writer, r routes) {
 			fmt.Fprintf(w, "r.Use(m.%s()...)\n", middleware)
 		}
 		methods := r.content[path].methods
-		for _, m := range []string{"Get", "Post", "Put", "Delete"} {
+		for _, m := range []string{"GET", "POST", "PUT", "DELETE"} {
 			handler, ok := methods[m]
 			if ok {
-				fmt.Fprintf(w, "r.%s(\"/\", rh.handle%s)\n", m, handler)
+				method := strings.Title(strings.ToLower(m))
+				fmt.Fprintf(w, "r.%s(\"/\", rh.handle%s)\n", method, handler)
 			}
 		}
 		fmt.Fprint(w, "})\n")
@@ -198,9 +199,9 @@ func getRoutes(app *pb.Application, epNames []string) (routes, error) {
 			msg := `expect "GET|POST|etc path/path" as endpoint name (%s) `
 			return routes{}, fmt.Errorf(msg, name)
 		}
-		httpMethod := strings.Title(strings.ToLower(fields[0]))
-		if _, ok := validHTTPMethods[strings.ToUpper(httpMethod)]; !ok {
-			return routes{}, fmt.Errorf("invalid HTTP Method (%s)", httpMethod)
+		method := strings.ToUpper(fields[0])
+		if _, ok := validHTTPMethods[method]; !ok {
+			return routes{}, fmt.Errorf("invalid HTTP Method (%s)", method)
 		}
 		endpoint := app.Endpoints[name]
 		httpPath := fields[1]
@@ -218,13 +219,13 @@ func getRoutes(app *pb.Application, epNames []string) (routes, error) {
 			paths = append(paths, httpPath)
 		}
 		interfaceMethod := GetMethodName(endpoint)
-		content[httpPath].methods[httpMethod] = interfaceMethod
-		content[httpPath].queryParams[httpMethod] = getQueryParams(endpoint)
-		if httpMethod == "Put" {
+		content[httpPath].methods[method] = interfaceMethod
+		content[httpPath].queryParams[method] = getQueryParams(endpoint)
+		if method == "PUT" {
 			t := getPayloadType(endpoint)
 			content[httpPath].putPayloadType = t
 		}
-		if httpMethod == "Post" {
+		if method == "POST" {
 			content[httpPath].postPayloadType = getPayloadType(endpoint)
 		}
 	}

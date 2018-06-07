@@ -20,7 +20,6 @@ func TestEnd2End(tt *testing.T) {
 	result, err := Generate(module, "mypkg")
 	assert.NoError(err)
 	assert.Equal(expectedStorer, string(result.Storer))
-	//fmt.Println(string(result.Storer))
 	assert.Equal(expectedMiddleware, string(result.Middleware))
 	assert.Equal(expectedRest, string(result.Rest))
 
