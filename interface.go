@@ -33,7 +33,8 @@ func getParams(ep *pb.Endpoint) (string, error) {
 	if ep.RestParams == nil {
 		return "", nil
 	}
-	params := make([]string, 0, 8)
+	patternParams := make([]string, 0, 8)
+	queryParams := make([]string, 0, 8)
 	for _, param := range ep.RestParams.QueryParam {
 		name := param.Name
 		typeStr, _, err := GetType(param.Type)
@@ -44,11 +45,13 @@ func getParams(ep *pb.Endpoint) (string, error) {
 		if len(matches) == 1 {
 			name = matches[0][1]
 			typeStr = matches[0][2]
-			params = append(params, fmt.Sprintf("%s %s", name, typeStr))
+			patternParams = append(patternParams, fmt.Sprintf("%s %s", name, typeStr))
 		} else {
-			params = append([]string{fmt.Sprintf("%s %s", name, typeStr)}, params...)
+			qp := []string{fmt.Sprintf("%s %s", name, typeStr)}
+			queryParams = append(qp, queryParams...)
 		}
 	}
+	params := append(queryParams, patternParams...)
 	for _, param := range ep.Param {
 		typeStr := param.Type.GetTypeRef().Ref.Appname.Part[0]
 		params = append(params, fmt.Sprintf("%s %s", param.Name, typeStr))

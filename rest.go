@@ -22,18 +22,18 @@ type routes struct {
 	content map[string]*route
 }
 
-var validHTTPMethods = map[string]interface{}{
-	"Get":    struct{}{},
-	"Put":    struct{}{},
-	"Post":   struct{}{},
-	"Delete": struct{}{},
+var validHTTPMethods = map[string]struct{}{
+	"GET":    {},
+	"PUT":    {},
+	"POST":   {},
+	"DELETE": {},
 }
 
 // WriteMiddleware writes interface returning required middleware functions
 // for REST endpoints
 func WriteMiddleware(w io.Writer, app *pb.Application, epNames []string) {
 	middlewares := make([]string, 0, len(epNames))
-	middlewareSet := make(map[string]interface{}, len(epNames))
+	middlewareSet := make(map[string]struct{}, len(epNames))
 	for _, name := range epNames {
 		if m, ok := app.Endpoints[name].Attrs["middleware"]; ok {
 			if _, ok2 := middlewareSet[m.GetS()]; !ok2 {
@@ -199,7 +199,7 @@ func getRoutes(app *pb.Application, epNames []string) (routes, error) {
 			return routes{}, fmt.Errorf(msg, name)
 		}
 		httpMethod := strings.Title(strings.ToLower(fields[0]))
-		if _, ok := validHTTPMethods[httpMethod]; !ok {
+		if _, ok := validHTTPMethods[strings.ToUpper(httpMethod)]; !ok {
 			return routes{}, fmt.Errorf("invalid HTTP Method (%s)", httpMethod)
 		}
 		endpoint := app.Endpoints[name]
