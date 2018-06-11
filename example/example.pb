@@ -1,5 +1,5 @@
-´<
-RestApiü<
+ ;
+RestApiæ;
 	
 RestApi"
 	interface"Storer"R
@@ -40,8 +40,8 @@ middleware"AuthorizeDataSet:
 
 returnBH/api/{key}/{startTime}
 	startTime	ö 
-key	ö *˜
-GET /api/{key}/nameﬂ
+key	ö *æ
+GET /api/{key}/name¶
 GET /api/{key}/name"
 method_name"GetDataSetName"
 patterns
@@ -49,20 +49,16 @@ middleware"AuthorizeDataSet:
 "rest" 
 
 middleware"AuthorizeDataSet:B	
-KeyNameB`/api/{key}/name
-key	ö 7
-time-J$
-
-	
-RestApi{queryTime<:string}ö *Ç
-POST /api/admin/{key}/subscribeﬁ
+KeyNameB'/api/{key}/name
+key	ö *Ä
+POST /api/admin/{key}/subscribe‹
 POST /api/admin/{key}/subscribe" 
 method_name"PutSubscription"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:B
+middleware"AuthorizeAdmin:B
 SubscriptionB2/api/admin/{key}/subscribe
 key	ö3 J
 sJ
@@ -81,15 +77,15 @@ middleware"AuthorizeDataSet:B
 key	ö J
 dpJ
 
-DataPayload*Ü
-!PUT /api/admin/{key}/restrictions‡
+DataPayload*Ñ
+!PUT /api/admin/{key}/restrictionsﬁ
 !PUT /api/admin/{key}/restrictions"
 method_name"PutRestriction"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:B
+middleware"AuthorizeAdmin:B
 RestrictionB5/api/admin/{key}/restrictions
 key	ö0 J
 rJ
@@ -142,15 +138,15 @@ B
 time-J$
 
 	
-RestApi{queryTime<:string}ö *ˆ
-#GET /api/admin/{key}/creation-timesŒ
+RestApi{queryTime<:string}ö *Ù
+#GET /api/admin/{key}/creation-timesÃ
 #GET /api/admin/{key}/creation-times"!
 method_name"GetCreationTimes"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:B
+middleware"AuthorizeAdmin:B
 CreationTimesB7/api/admin/{key}/creation-times
 key	ö+ *€
 PUT /api/{key}/schema¡
@@ -203,15 +199,15 @@ B
 middleware"AuthorizeRoot"
 
 method_doc	"DataSet:B
-KeysB/api*Ï
-!GET /api/admin/{key}/restrictions∆
+KeysB/api*Í
+!GET /api/admin/{key}/restrictionsƒ
 !GET /api/admin/{key}/restrictions"
 method_name"GetRestriction"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:B
+middleware"AuthorizeAdmin:B
 RestrictionB5/api/admin/{key}/restrictions
 key	ö. *¢
 !PUT /api/{key}/schema/{startTime}¸
@@ -228,29 +224,28 @@ B
 key	ö  J
 spJ
 
-SchemaPayload*Ö
-!POST /api/admin/{key}/unsubscribeﬂ
+SchemaPayload*â
+!POST /api/admin/{key}/unsubscribe„
 !POST /api/admin/{key}/unsubscribe"#
 method_name"DeleteSubscription"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:
-
-returnB4/api/admin/{key}/unsubscribe
+middleware"AuthorizeAdmin:B
+SubscriptionB4/api/admin/{key}/unsubscribe
 key	ö6 J
 sJ
 
-Subscription*‹
-DELETE /api/admin/{key}¿
+Subscription*⁄
+DELETE /api/admin/{key}æ
 DELETE /api/admin/{key}"
 method_name"DeleteDataSet"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet"
+middleware"AuthorizeAdmin"
 
 method_doc"Admin:
 
@@ -267,15 +262,15 @@ middleware"AuthorizeDataSet:
 
 returnBO/api/{key}/schema/{startTime}
 	startTime	ö" 
-key	ö" *‚
- GET /api/admin/{key}/start-timesΩ
+key	ö" *‡
+ GET /api/admin/{key}/start-timesª
  GET /api/admin/{key}/start-times"
 method_name"GetStartTimes"
 patterns
 :
-"rest" 
+"rest"
 
-middleware"AuthorizeDataSet:	B
+middleware"AuthorizeAdmin:	B
 TimesB4/api/admin/{key}/start-times
 key	ö( 2å
 Restriction¸õ
@@ -314,13 +309,11 @@ start-timeöf
 
 JSONSchemaB
 json"schemaögBR
-docK"IDataSetPayload is JSON payload on REST API request to create new data set2¢
-TimesòF
-+
-Data#"!
-B
-json"
-data-timesöY
+docK"IDataSetPayload is JSON payload on REST API request to create new data set2å
+TimesÇ0
+
+Data"
+	öY
 
 Schema"
 	öZBN
@@ -360,27 +353,27 @@ data-timesöY
 DataPayload^
 
 Data	ömBG
-doc@">DataPayload is JSON payload on REST API request to update data2ù
-Subscriptionå<
+doc@">DataPayload is JSON payload on REST API request to update data2ú
+Subscriptionã;
 
 URLB
 json"urlöD
-
-SecreteToken	öEBL
+
+SecretToken	öEBL
 docE"CSubscription holds external endpoint values for change notification2±
 Data®Z
 
 CreationTime	ö<
 %
-JSONDataB
+JSONDataB
 json"dataö;
 
 	StartTime	ö:BJ
-docC"AData holds JSON data valid from StartTime created at CreationTime2≥
-CreationTimes°ø
-i
-DataaB
-json"data-time-mapJ?
+docC"AData holds JSON data valid from StartTime created at CreationTime2™
+CreationTimesò∂
+`
+DataXB
+json"dataJ?
 
 	
 RestApiCreationTimes!map of string:CreationStartTimeöa
@@ -395,7 +388,7 @@ R
 CreationTime	öA
 )
 
-JSONSchemaB
+JSONSchemaB
 json"schemaö@
 
 	StartTime	ö?BT

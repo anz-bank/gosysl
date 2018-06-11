@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 
 	"github.com/anz-bank/gosysl"
 	"github.com/anz-bank/gosysl/pb"
@@ -38,7 +41,16 @@ func main() {
 	if err != nil {
 		log.Fatal("Code generation error: ", err)
 	}
-	fmt.Printf("Main.Result: %v\n", result)
-	fmt.Printf("Finished successfully\n")
 
+	s := reflect.ValueOf(&result).Elem()
+	for i, n := 0, s.NumField(); i < n; i++ {
+		content := s.Field(i).Interface().([]byte)
+		basename := strings.ToLower(s.Type().Field(i).Name)
+		filename := filepath.Join(outDir, basename+".go")
+		err = ioutil.WriteFile(filename, content, 0644)
+		if err != nil {
+			log.Fatal("Cannot write file ", filename)
+		}
+	}
+	fmt.Printf("Finished successfully\n")
 }

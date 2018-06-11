@@ -5,7 +5,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
         POST (ds <: DataSetPayload) [method_name="CreateDataSet"]:
             return Key
     /api/{key<:string}/name  [middleware="AuthorizeDataSet"]:
-            GET ?time={queryTime<:string} [method_name="GetDataSetName"]:
+            GET [method_name="GetDataSetName"]:
                 return KeyName
             PUT(np <: NamePayload) [method_name="PutDataSetName"]:
                 return KeyName
@@ -33,7 +33,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
                 return Schema
             DELETE [method_name="DeleteSchema"]:
                 return
-    /api/admin/{key<:string}  [middleware="AuthorizeDataSet"]:
+    /api/admin/{key<:string}  [middleware="AuthorizeAdmin"]:
         DELETE [method_name="DeleteDataSet",  method_doc="Admin"]:
             return
         /start-times:
@@ -52,21 +52,21 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
                 return Subscription
         /unsubscribe:
             POST(s <: Subscription) [method_name="DeleteSubscription"]:
-                return
+                return Subscription
 
     !type Data [doc="Data holds JSON data valid from StartTime created at CreationTime"]:
         StartTime    <: string
-        JSONData     <: string [json="data"]
+        JSONData     <: any [json="data"]
         CreationTime <: string
 
     !type Schema [doc="Schema holds JSON Schema to validate Data against, a name for key creation."]:
         StartTime    <: string
-        JSONSchema   <: string [json="schema"]
+        JSONSchema   <: any [json="schema"]
         CreationTime <: string
 
     !type Subscription [doc= "Subscription holds external endpoint values for change notification"]:
         URL          <: string [json="url"]
-        SecreteToken <: string
+        SecretToken <: string
 
     !type Restriction [doc= "Restriction contains scope access restriction and frozen times for schema and data."]:
         SchemaFrozenUntil <: string
@@ -86,7 +86,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
         Name <: string
 
     !type Times [doc= "Times contains schema and data times, used to get StartTimes for both"]:
-        Data(0..)   <: string [json="data-times"]
+        Data(0..)   <: string
         Schema(0..) <: string
 
     !type CreationStartTime [doc= "CreationStartTime contains start and creation time for a schema or data snapshot"]:
@@ -94,7 +94,7 @@ RestApi [json_property_separator="-", interface="Storer", interface_doc="Storer 
         StartTime <: string
 
     !type CreationTimes [doc= "CreationTimes contains schema and data times maps, used to StartTime to CreationTims"]:
-        Data   <: map of string:CreationStartTime  [json="data-time-map"]
+        Data   <: map of string:CreationStartTime  [json="data"]
         Schema <: map of string:CreationStartTime
 
     !type DataSetPayload [doc= "DataSetPayload is JSON payload on REST API request to create new data set"]:

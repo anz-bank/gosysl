@@ -4,6 +4,7 @@
   	"unconvert",
 	"testify",
 	"test",
+	"gasv2",
 	"gofmt",
 	"goimports",
 	"lll",
@@ -31,5 +32,19 @@
 	"goconst",
 	"gas"
   ],
-  "LineLength" : 90
+  "Disable" :[
+	"dupl",
+	"gas"
+  ],
+  "Exclude" : [
+  	 ".*Errors unhandled.*fmt.Fprint.*gasv2.*"
+  ],
+  "Linters": {
+        "gasv2": {
+          	"Command": "gas -fmt=csv",
+          	"Pattern": "^(?P<path>.*?\\.go),(?P<line>\\d+),(?P<message>[^,]+,[^,]+,[^,]+,\".*\")"
+        }
+   },
+ "LineLength" : 90,
+ "Deadline": "100s"
 }
